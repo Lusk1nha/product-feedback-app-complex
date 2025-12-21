@@ -3,6 +3,11 @@ import { IUserRepository, USER_REPOSITORY } from 'src/modules/iam/domain/reposit
 import { HashingService } from 'src/shared/application/services/hash.service'
 import { ITokenProvider, TOKEN_PROVIDER, AuthTokens } from '../../ports/token.provider.interface'
 import { InvalidCredentialsError } from 'src/modules/iam/domain/errors/invalid-credentials.error'
+import {
+  IRefreshTokenRepository,
+  REFRESH_TOKEN_REPOSITORY,
+} from 'src/modules/iam/domain/repositories/refresh-token.repository.interface'
+import { RefreshToken } from 'src/modules/iam/domain/entities/refresh-token.entity'
 
 export interface LoginCommand {
   email: string
@@ -13,16 +18,16 @@ export interface LoginCommand {
 export class LoginUseCase {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
+    @Inject(REFRESH_TOKEN_REPOSITORY) private readonly refreshTokenRepository: IRefreshTokenRepository,
     @Inject(TOKEN_PROVIDER) private readonly tokenProvider: ITokenProvider,
     private readonly hashingService: HashingService,
   ) {}
 
+  private readonly EXPIRES_IN = 7 * 24 * 60 * 60 * 1000
+
   async execute(command: LoginCommand): Promise<AuthTokens> {
-    // 1. Busca Usuário e Conta (Tudo em uma query para performance)
     const accountData = await this.userRepository.findByEmailWithAccount(command.email)
 
-    // 2. Fail Fast e Seguro:
-    // Se não achou usuário OU não tem senha (conta Google), erro genérico.
     if (!accountData || !accountData.account.password) {
       throw new InvalidCredentialsError()
     }
@@ -33,14 +38,24 @@ export class LoginUseCase {
       throw new InvalidCredentialsError()
     }
 
-    // 3. Valida Senha
     const isPasswordValid = await this.hashingService.compare(command.password, account.password)
 
     if (!isPasswordValid) {
       throw new InvalidCredentialsError()
     }
 
-    // 4. Gera Tokens
-    return this.tokenProvider.generateAuthTokens(user)
+    const tokens = await this.tokenProvider.generateAuthTokens(user)
+
+    const refreshTokenHash = await this.hashingService.hashToken(tokens.refreshToken)
+
+    const refreshTokenEntity = RefreshToken.create({
+      userId: user.id,
+      tokenHash: refreshTokenHash,
+      expiresAt: new Date(Date.now() + this.EXPIRES_IN),
+    })
+
+    await this.refreshTokenRepository.create(refreshTokenEntity)
+
+    return tokens
   }
 }

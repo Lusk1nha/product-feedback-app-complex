@@ -15,6 +15,20 @@
       "when": 1766281235854,
       "tag": "0001_wonderful_zodiak",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766328997767,
+      "tag": "0002_condemned_mojo",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1766330227068,
+      "tag": "0003_legal_johnny_blaze",
+      "breakpoints": true
     }
   ]
 }

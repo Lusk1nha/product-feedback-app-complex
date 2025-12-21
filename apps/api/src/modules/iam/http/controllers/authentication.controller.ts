@@ -8,15 +8,21 @@ import { RefreshTokenUseCase } from '../../application/use-cases/auth/refresh-to
 import { UnauthorizedException } from '@nestjs/common'
 import { LoginUseCase } from '../../application/use-cases/auth/login.usecase'
 import { RegisterUseCase } from '../../application/use-cases/auth/register.usecase'
+import { Environment } from 'src/shared/infrastructure/environment/env.schema'
+import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { LogoutUseCase } from '../../application/use-cases/auth/logout.usecase'
 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthenticationController {
   constructor(
     private readonly registerUseCase: RegisterUseCase,
     private readonly loginUseCase: LoginUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
+    private readonly logoutUseCase: LogoutUseCase,
   ) {}
 
+  @ApiOperation({ summary: 'Register', description: 'Registers a new user and returns access and refresh tokens' })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() dto: RegisterUserDto, @Res({ passthrough: true }) response: Response) {
@@ -37,6 +43,7 @@ export class AuthenticationController {
     return { message: 'User created successfully' }
   }
 
+  @ApiOperation({ summary: 'Login', description: 'Logs in the user and returns access and refresh tokens' })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response) {
@@ -46,6 +53,7 @@ export class AuthenticationController {
     return { message: 'Logged in successfully' }
   }
 
+  @ApiOperation({ summary: 'Refresh Tokens', description: 'Refreshes the access and refresh tokens' })
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(@Cookies('refreshToken') refreshToken: string, @Res({ passthrough: true }) response: Response) {
@@ -53,7 +61,6 @@ export class AuthenticationController {
       throw new UnauthorizedException('Refresh token not found')
     }
 
-    // Chamada limpa ao Use Case
     const tokens = await this.refreshTokenUseCase.execute({ refreshToken })
 
     this.setCookies(response, tokens.accessToken, tokens.refreshToken)
@@ -61,25 +68,41 @@ export class AuthenticationController {
     return { message: 'Tokens refreshed successfully' }
   }
 
-  // --- Helper Privado para Configuração de Cookies ---
-  private setCookies(response: Response, accessToken: string, refreshToken: string) {
-    const isProduction = process.env.NODE_ENV === 'production'
+  @ApiOperation({ summary: 'Logout', description: 'Clears the cookies and logs out the user' })
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Cookies('refreshToken') refreshToken: string, @Res({ passthrough: true }) response: Response) {
+    await this.logoutUseCase.execute({ refreshToken })
 
-    const cookieOptions: CookieOptions = {
+    const cookieOptions = this.getCookieOptions()
+    response.clearCookie('accessToken', cookieOptions)
+    response.clearCookie('refreshToken', cookieOptions)
+
+    return { message: 'Logged out successfully' }
+  }
+
+  // --- Helper Privado para Configuração de Cookies ---
+  private getCookieOptions(): CookieOptions {
+    const isProduction = process.env.NODE_ENV === Environment.Production
+
+    return {
       secure: isProduction,
       httpOnly: true,
-      sameSite: isProduction ? 'strict' : ('lax' as const),
-      domain: undefined, // Ajuste se usar subdomínios
-      path: '/', // Importante para garantir que o cookie valha para todo o app
+      sameSite: isProduction ? 'strict' : 'lax',
+      path: '/', // Crítico: se o path for diferente, o logout falha silenciosamente
     }
+  }
+
+  private setCookies(response: Response, accessToken: string, refreshToken: string) {
+    const options = this.getCookieOptions()
 
     response.cookie('accessToken', accessToken, {
-      ...cookieOptions,
-      maxAge: 15 * 60 * 1000, // 15 minutos
+      ...options,
+      maxAge: 15 * 60 * 1000, // 15 min
     })
 
     response.cookie('refreshToken', refreshToken, {
-      ...cookieOptions,
+      ...options,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
     })
   }

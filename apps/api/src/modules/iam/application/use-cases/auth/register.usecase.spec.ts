@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { RegisterUseCase } from './register.usecase'
+import { RegisterCommand, RegisterUseCase } from './register.usecase'
 import { USER_REPOSITORY } from 'src/modules/iam/domain/repositories/user.repository.interface'
 import { User } from 'src/modules/iam/domain/entities/user.entity'
 import { faker } from '@faker-js/faker'
@@ -45,7 +45,7 @@ describe('RegisterUseCase', () => {
 
   it('should create a user successfully', async () => {
     // Arrange
-    const command = {
+    const command: RegisterCommand = {
       username: faker.internet.username(),
       email: faker.internet.email(),
       fullName: faker.person.fullName(),

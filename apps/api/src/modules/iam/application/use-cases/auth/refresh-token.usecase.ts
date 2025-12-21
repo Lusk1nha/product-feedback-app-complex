@@ -2,6 +2,13 @@ import { Inject, Injectable } from '@nestjs/common'
 import { IUserRepository, USER_REPOSITORY } from 'src/modules/iam/domain/repositories/user.repository.interface'
 import { AuthTokens, ITokenProvider, TOKEN_PROVIDER } from '../../ports/token.provider.interface'
 import { UserNotFoundError } from 'src/modules/iam/domain/errors/user-not-found.error'
+import { InvalidRefreshTokenError } from 'src/modules/iam/domain/errors/invalid-refresh-token.error'
+import {
+  IRefreshTokenRepository,
+  REFRESH_TOKEN_REPOSITORY,
+} from 'src/modules/iam/domain/repositories/refresh-token.repository.interface'
+import { HashingService } from 'src/shared/application/services/hash.service'
+import { RefreshToken } from 'src/modules/iam/domain/entities/refresh-token.entity'
 
 export interface RefreshTokenCommand {
   refreshToken: string
@@ -11,22 +18,38 @@ export interface RefreshTokenCommand {
 export class RefreshTokenUseCase {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
+    @Inject(REFRESH_TOKEN_REPOSITORY) private readonly refreshTokenRepository: IRefreshTokenRepository,
     @Inject(TOKEN_PROVIDER) private readonly tokenProvider: ITokenProvider,
+    private readonly hashingService: HashingService,
   ) {}
 
+  private readonly EXPIRES_IN = 7 * 24 * 60 * 60 * 1000
   async execute(command: RefreshTokenCommand): Promise<AuthTokens> {
-    // 1. Validação do Token (Delega para o Provider)
-    // Se for inválido, o provider já lança InvalidRefreshTokenError
     const payload = await this.tokenProvider.verifyRefreshToken(command.refreshToken)
 
-    // 2. Validação do Usuário (Regra de Negócio)
-    const user = await this.userRepository.findById(payload.sub)
+    const tokenHash = await this.hashingService.hashToken(command.refreshToken)
+    const session = await this.refreshTokenRepository.findByTokenHash(tokenHash)
 
-    if (!user) {
-      throw new UserNotFoundError()
+    if (!session) {
+      throw new InvalidRefreshTokenError()
     }
 
-    // 3. Geração de Novos Tokens
-    return this.tokenProvider.generateAuthTokens(user)
+    const user = await this.userRepository.findById(payload.sub)
+    if (!user) throw new UserNotFoundError()
+
+    await this.refreshTokenRepository.deleteByTokenHash(tokenHash)
+
+    const newTokens = await this.tokenProvider.generateAuthTokens(user)
+    const newTokenHash = await this.hashingService.hashToken(newTokens.refreshToken)
+
+    const newSession = RefreshToken.create({
+      userId: user.id,
+      tokenHash: newTokenHash,
+      expiresAt: new Date(Date.now() + this.EXPIRES_IN),
+    })
+
+    await this.refreshTokenRepository.create(newSession)
+
+    return newTokens
   }
 }

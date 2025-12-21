@@ -12,17 +12,22 @@ import { RefreshTokenUseCase } from './application/use-cases/auth/refresh-token.
 import { TOKEN_PROVIDER } from './application/ports/token.provider.interface'
 import { JwtTokenService } from './infrastructure/tokens/jwt-token.service'
 import { LoginUseCase } from './application/use-cases/auth/login.usecase'
+import { REFRESH_TOKEN_REPOSITORY } from './domain/repositories/refresh-token.repository.interface'
+import { RefreshTokenDrizzleRepository } from './infrastructure/database/repositories/refresh-token.drizzle-repository'
+import { LogoutUseCase } from './application/use-cases/auth/logout.usecase'
 
 @Module({
-  imports: [JwtModule.register({})], // DatabaseModule já é Global, não precisa importar
+  imports: [JwtModule.register({})],
   controllers: [UserController, AuthenticationController],
   providers: [
     { provide: USER_REPOSITORY, useClass: UserDrizzleRepository },
+    { provide: REFRESH_TOKEN_REPOSITORY, useClass: RefreshTokenDrizzleRepository },
     { provide: HashingService, useClass: BcryptHashingService },
 
     RegisterUseCase,
     RefreshTokenUseCase,
     LoginUseCase,
+    LogoutUseCase,
 
     { provide: TOKEN_PROVIDER, useClass: JwtTokenService },
   ],
