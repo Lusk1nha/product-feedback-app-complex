@@ -6,6 +6,7 @@ import { UserNotFoundError } from 'src/modules/iam/domain/errors/user-not-found.
 import { InvalidRefreshTokenError } from 'src/modules/iam/domain/errors/invalid-refresh-token.error'
 import { faker } from '@faker-js/faker'
 import { REFRESH_TOKEN_REPOSITORY } from 'src/modules/iam/domain/repositories/refresh-token.repository.interface'
+import { HashingService } from 'src/shared/application/services/hash.service'
 
 // Mocks
 const mockUserRepository = {
@@ -19,7 +20,13 @@ const mockTokenProvider = {
 
 const mockRefreshTokenRepository = {
   create: jest.fn(),
+  findByTokenHash: jest.fn(),
   deleteByTokenHash: jest.fn(),
+}
+
+const mockHashingService = {
+  compare: jest.fn(),
+  hashToken: jest.fn(),
 }
 
 describe('RefreshTokenUseCase', () => {
@@ -40,6 +47,10 @@ describe('RefreshTokenUseCase', () => {
         {
           provide: TOKEN_PROVIDER,
           useValue: mockTokenProvider,
+        },
+        {
+          provide: HashingService,
+          useValue: mockHashingService,
         },
       ],
     }).compile()
@@ -63,8 +74,14 @@ describe('RefreshTokenUseCase', () => {
     mockTokenProvider.verifyRefreshToken.mockResolvedValue(payload)
     mockUserRepository.findById.mockResolvedValue(user)
     mockTokenProvider.generateAuthTokens.mockResolvedValue(newTokens)
+    mockRefreshTokenRepository.findByTokenHash.mockResolvedValue({
+      userId: user.id,
+      tokenHash: 'hashed-refresh-token',
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    })
     mockRefreshTokenRepository.create.mockResolvedValue({})
     mockRefreshTokenRepository.deleteByTokenHash.mockResolvedValue({})
+    mockHashingService.hashToken.mockResolvedValue('hashed-refresh-token')
 
     // Act
     const result = await useCase.execute(command)

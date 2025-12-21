@@ -17,6 +17,7 @@ const mockTokenProvider = {
 
 const mockHashingService = {
   compare: jest.fn(),
+  hashToken: jest.fn(),
 }
 
 const mockRefreshTokenRepository = {
@@ -56,6 +57,7 @@ describe('LoginUseCase', () => {
     })
 
     mockHashingService.compare.mockResolvedValue(true) // Senha Correta
+    mockHashingService.hashToken.mockResolvedValue('hashed-refresh-token')
     mockTokenProvider.generateAuthTokens.mockResolvedValue(tokens)
     mockRefreshTokenRepository.create.mockResolvedValue({})
 
