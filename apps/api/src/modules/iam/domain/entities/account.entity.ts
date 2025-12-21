@@ -1,4 +1,4 @@
-import { BaseEntity } from 'src/shared/domain/base.entity'
+import { BaseEntity } from 'src/shared/domain/entities/base.entity'
 
 export type AuthProvider = 'local' | 'google'
 

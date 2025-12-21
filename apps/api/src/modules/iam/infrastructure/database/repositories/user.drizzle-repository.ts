@@ -65,8 +65,11 @@ export class UserDrizzleRepository implements IUserRepository {
   }
 
   async findById(id: number): Promise<User | null> {
-    const [user] = await this.db.select().from(schema.users).where(eq(schema.users.id, id)).limit(1)
+    const result = await this.db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.id, id),
+    })
 
-    return user ? UserMapper.toDomain(user) : null
+    if (!result) return null
+    return UserMapper.toDomain(result)
   }
 }

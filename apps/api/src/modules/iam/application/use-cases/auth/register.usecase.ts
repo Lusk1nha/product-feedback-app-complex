@@ -5,7 +5,7 @@ import { UserAlreadyExistsError } from 'src/modules/iam/domain/errors/user-alrea
 import { HashingService } from 'src/shared/application/services/hash.service'
 import { Account } from 'src/modules/iam/domain/entities/account.entity'
 
-export interface CreateUserCommand {
+export interface RegisterCommand {
   username: string
   email: string
   fullName: string
@@ -14,13 +14,13 @@ export interface CreateUserCommand {
 }
 
 @Injectable()
-export class CreateUserUseCase {
+export class RegisterUseCase {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
     private readonly hashingService: HashingService,
   ) {}
 
-  async execute(command: CreateUserCommand): Promise<User> {
+  async execute(command: RegisterCommand): Promise<User> {
     await this.checkUserDoesNotExists(command.email)
 
     const hashedPassword = await this.hashingService.hash(command.password)

@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config'
 import { Env, Environment } from '../environment/env.schema'
 import { DomainExceptionFilter } from './filters/domain-exception.filter'
 import { setupSwaggerWithScalar } from './scalar.setup'
+import { ApplicationExceptionFilter } from './filters/application-exception.filter'
 
 /**
  * Configurações de Segurança (Helmet, Cookies)
@@ -42,6 +43,7 @@ export function configurePipesAndFilters(app: INestApplication) {
   )
 
   app.useGlobalFilters(new DomainExceptionFilter())
+  app.useGlobalFilters(new ApplicationExceptionFilter())
 }
 
 /**

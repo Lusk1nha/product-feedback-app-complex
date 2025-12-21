@@ -1,9 +1,11 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common'
 import { Response } from 'express'
-import { DomainError } from 'src/shared/domain/base.error'
+import { DomainError } from 'src/shared/domain/errors/domain.error'
 import { UserAlreadyExistsError } from 'src/modules/iam/domain/errors/user-already-exists.error'
 import { InvalidEmailError } from 'src/modules/iam/domain/errors/invalid-email.error'
 import { InvalidCredentialsError } from 'src/modules/iam/domain/errors/invalid-credentials.error'
+import { UserNotFoundError } from 'src/modules/iam/domain/errors/user-not-found.error'
+import { InvalidRefreshTokenError } from 'src/modules/iam/domain/errors/invalid-refresh-token.error'
 
 @Catch(DomainError)
 export class DomainExceptionFilter implements ExceptionFilter {
@@ -11,6 +13,8 @@ export class DomainExceptionFilter implements ExceptionFilter {
     [UserAlreadyExistsError.name]: HttpStatus.CONFLICT, // 409
     [InvalidEmailError.name]: HttpStatus.BAD_REQUEST, // 400
     [InvalidCredentialsError.name]: HttpStatus.UNAUTHORIZED, // 401
+    [UserNotFoundError.name]: HttpStatus.UNAUTHORIZED, // 404
+    [InvalidRefreshTokenError.name]: HttpStatus.UNAUTHORIZED,
   }
 
   catch(exception: DomainError, host: ArgumentsHost) {

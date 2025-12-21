@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common'
 import { faker } from '@faker-js/faker'
-import {
-  CreateUserUseCase,
-  CreateUserCommand,
-} from '../../src/modules/iam/application/use-cases/users/create-user.usecase'
+import { RegisterCommand, RegisterUseCase } from '../../src/modules/iam/application/use-cases/auth/register.usecase'
 
 @Injectable()
 export class UserFactory {
-  constructor(private readonly createUserUseCase: CreateUserUseCase) {}
+  constructor(private readonly registerUseCase: RegisterUseCase) {}
 
-  async make(overrides: Partial<CreateUserCommand> = {}) {
+  async make(overrides: Partial<RegisterCommand> = {}) {
     const password = overrides.password ?? 'StrongPass123!'
 
-    const command: CreateUserCommand = {
+    const command: RegisterCommand = {
       username: overrides.username ?? faker.internet.username(),
       email: (overrides.email ?? faker.internet.email()).toLowerCase(),
       fullName: overrides.fullName ?? faker.person.fullName(),
@@ -20,7 +17,7 @@ export class UserFactory {
       avatarUrl: overrides.avatarUrl,
     }
 
-    const user = await this.createUserUseCase.execute(command)
+    const user = await this.registerUseCase.execute(command)
 
     // Retornamos um objeto composto para ajudar nos testes
     return {

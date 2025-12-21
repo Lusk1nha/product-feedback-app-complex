@@ -2,12 +2,16 @@ import { Module } from '@nestjs/common'
 import { USER_REPOSITORY } from './domain/repositories/user.repository.interface'
 import { UserController } from './http/controllers/user.controller'
 import { UserDrizzleRepository } from './infrastructure/database/repositories/user.drizzle-repository'
-import { CreateUserUseCase } from './application/use-cases/users/create-user.usecase'
+import { RegisterUseCase } from './application/use-cases/auth/register.usecase'
 import { JwtModule } from '@nestjs/jwt'
 import { AuthenticationController } from './http/controllers/authentication.controller'
 import { HashingService } from 'src/shared/application/services/hash.service'
 import { BcryptHashingService } from 'src/shared/infrastructure/services/bcrypt-hashing.service'
-import { AuthenticationService } from './application/services/authentication.service'
+
+import { RefreshTokenUseCase } from './application/use-cases/auth/refresh-token.usecase'
+import { TOKEN_PROVIDER } from './application/ports/token.provider.interface'
+import { JwtTokenService } from './infrastructure/tokens/jwt-token.service'
+import { LoginUseCase } from './application/use-cases/auth/login.usecase'
 
 @Module({
   imports: [JwtModule.register({})], // DatabaseModule já é Global, não precisa importar
@@ -15,9 +19,13 @@ import { AuthenticationService } from './application/services/authentication.ser
   providers: [
     { provide: USER_REPOSITORY, useClass: UserDrizzleRepository },
     { provide: HashingService, useClass: BcryptHashingService },
-    CreateUserUseCase,
-    AuthenticationService,
+
+    RegisterUseCase,
+    RefreshTokenUseCase,
+    LoginUseCase,
+
+    { provide: TOKEN_PROVIDER, useClass: JwtTokenService },
   ],
-  exports: [CreateUserUseCase, AuthenticationService],
+  exports: [],
 })
 export class IamModule {}

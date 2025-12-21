@@ -1,82 +1,93 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { CreateUserUseCase } from './create-user.usecase'
+import { RegisterUseCase } from './register.usecase'
 import { USER_REPOSITORY } from 'src/modules/iam/domain/repositories/user.repository.interface'
 import { User } from 'src/modules/iam/domain/entities/user.entity'
-
 import { faker } from '@faker-js/faker'
 import { UserAlreadyExistsError } from 'src/modules/iam/domain/errors/user-already-exists.error'
+import { HashingService } from 'src/shared/application/services/hash.service' // Importe isso
 
-// 1. Criamos um Mock do Repositório
-// Não queremos conectar no banco real aqui.
+// 1. Mock do Repositório
 const mockUserRepository = {
   create: jest.fn(),
   findByEmail: jest.fn(),
   findById: jest.fn(),
 }
 
-describe('CreateUserUseCase', () => {
-  let useCase: CreateUserUseCase
+// 2. Mock do Hashing Service (NOVO)
+const mockHashingService = {
+  hash: jest.fn(),
+  compare: jest.fn(),
+}
+
+describe('RegisterUseCase', () => {
+  let useCase: RegisterUseCase
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        CreateUserUseCase,
+        RegisterUseCase,
         {
           provide: USER_REPOSITORY,
-          useValue: mockUserRepository, // Injetamos o Mock
+          useValue: mockUserRepository,
+        },
+        // 3. Fornecemos o Mock do Hashing Service
+        {
+          provide: HashingService,
+          useValue: mockHashingService,
         },
       ],
     }).compile()
 
-    useCase = module.get<CreateUserUseCase>(CreateUserUseCase)
+    useCase = module.get<RegisterUseCase>(RegisterUseCase)
 
-    // Limpa os mocks antes de cada teste
     jest.clearAllMocks()
   })
 
   it('should create a user successfully', async () => {
-    // Arrange (Preparação)
+    // Arrange
     const command = {
       username: faker.internet.username(),
       email: faker.internet.email(),
       fullName: faker.person.fullName(),
       avatarUrl: faker.image.avatar(),
-
       password: faker.internet.password(),
     }
 
-    // Simulamos que NÃO existe usuário com esse email
-    mockUserRepository.findByEmail.mockResolvedValue(null)
-    // Simulamos o retorno do create (fingindo que o banco salvou)
+    // Configura os retornos dos Mocks
+    mockUserRepository.findByEmail.mockResolvedValue(null) // Usuário não existe
+    mockHashingService.hash.mockResolvedValue('hashed-password-123') // Simula o hash
+
+    // Simula o create retornando o user (O repositorio real agora retorna User, não Account junto no retorno direto do create se seguir a interface antiga, mas vamos assumir sucesso)
     mockUserRepository.create.mockImplementation((user) => Promise.resolve(user))
 
-    // Act (Ação)
+    // Act
     const result = await useCase.execute(command)
 
-    // Assert (Verificação)
+    // Assert
     expect(result).toBeInstanceOf(User)
     expect(result.username).toBe(command.username)
-    expect(mockUserRepository.create).toHaveBeenCalled() // Garante que chamou o repo
+
+    expect(mockHashingService.hash).toHaveBeenCalledWith(command.password)
+    expect(mockUserRepository.create).toHaveBeenCalled()
   })
 
-  it('should throw ConflictException if email already exists', async () => {
+  it('should throw UserAlreadyExistsError if email already exists', async () => {
     // Arrange
     const command = {
       username: faker.internet.username(),
       email: faker.internet.email(),
       fullName: faker.person.fullName(),
       password: faker.internet.password(),
-
       avatarUrl: faker.image.avatar(),
     }
 
-    // Simulamos que JÁ EXISTE usuário
     mockUserRepository.findByEmail.mockResolvedValue({ id: 1, ...command })
 
     // Act & Assert
     await expect(useCase.execute(command)).rejects.toThrow(UserAlreadyExistsError)
 
-    // Garante que NÃO tentou criar
+    // Verifica que NÃO tentou fazer hash nem salvar
+    expect(mockHashingService.hash).not.toHaveBeenCalled()
     expect(mockUserRepository.create).not.toHaveBeenCalled()
   })
 })

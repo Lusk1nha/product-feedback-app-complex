@@ -1,7 +1,7 @@
 import { DomainError } from 'src/shared/domain/errors/domain.error'
 
-export class InvalidCredentialsError extends DomainError {
+export class UserNotFoundError extends DomainError {
   constructor() {
-    super('Invalid credentials')
+    super('User not found')
   }
 }

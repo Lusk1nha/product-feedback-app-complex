@@ -1,4 +1,4 @@
-import { BaseEntity } from 'src/shared/domain/base.entity'
+import { BaseEntity } from 'src/shared/domain/entities/base.entity'
 import { Email } from 'src/modules/iam/domain/value-objects/email.vo'
 import { Account } from './account.entity'
 
