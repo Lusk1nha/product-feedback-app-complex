@@ -29,6 +29,20 @@
       "when": 1766330227068,
       "tag": "0003_legal_johnny_blaze",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1766369151914,
+      "tag": "0004_unusual_phantom_reporter",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1766369696706,
+      "tag": "0005_moaning_violations",
+      "breakpoints": true
     }
   ]
 }

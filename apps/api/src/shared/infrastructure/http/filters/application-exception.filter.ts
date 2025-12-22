@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common'
 import { Response } from 'express'
 import { ApplicationError } from 'src/shared/domain/errors/application.error'
-import { RefreshTokenNotFoundError } from 'src/modules/iam/http/errors/refresh-token-not-found.error'
+import { RefreshTokenNotFoundError } from 'src/modules/iam/infrastructure/http/errors/refresh-token-not-found.error'
 
 @Catch(ApplicationError)
 export class ApplicationExceptionFilter implements ExceptionFilter {

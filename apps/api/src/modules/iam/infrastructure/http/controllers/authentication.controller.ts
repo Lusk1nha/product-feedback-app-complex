@@ -4,13 +4,13 @@ import { Body, Controller, HttpCode, HttpStatus, Post, Res } from '@nestjs/commo
 import { LoginDto } from '../dtos/login.dto'
 import { RegisterUserDto } from '../dtos/register-user.dto'
 import { Cookies } from 'src/shared/infrastructure/http/decorators/cookies.decorator'
-import { RefreshTokenUseCase } from '../../application/use-cases/auth/refresh-token.usecase'
+import { RefreshTokenUseCase } from '../../../application/use-cases/auth/refresh-token.usecase'
 import { UnauthorizedException } from '@nestjs/common'
-import { LoginUseCase } from '../../application/use-cases/auth/login.usecase'
-import { RegisterUseCase } from '../../application/use-cases/auth/register.usecase'
+import { LoginUseCase } from '../../../application/use-cases/auth/login.usecase'
+import { RegisterUseCase } from '../../../application/use-cases/auth/register.usecase'
 import { Environment } from 'src/shared/infrastructure/environment/env.schema'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
-import { LogoutUseCase } from '../../application/use-cases/auth/logout.usecase'
+import { LogoutUseCase } from '../../../application/use-cases/auth/logout.usecase'
 
 @ApiTags('Authentication')
 @Controller('auth')

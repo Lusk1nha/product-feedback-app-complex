@@ -17,6 +17,8 @@ export class JwtTokenService implements ITokenProvider {
     const payload: TokenPayload = {
       sub: user.id,
       email: user.email.getValue(),
+
+      role: user.role,
     }
 
     const [accessToken, refreshToken] = await Promise.all([

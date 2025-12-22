@@ -1,4 +1,7 @@
 import { User } from '../../domain/entities/user.entity'
+import { UserRole } from '../../domain/enums/user-role.enum'
+
+export const TOKEN_PROVIDER = Symbol('TOKEN_PROVIDER')
 
 export interface AuthTokens {
   accessToken: string
@@ -8,9 +11,9 @@ export interface AuthTokens {
 export interface TokenPayload {
   sub: number
   email: string
-}
 
-export const TOKEN_PROVIDER = Symbol('TOKEN_PROVIDER')
+  role: UserRole
+}
 
 export interface ITokenProvider {
   generateAuthTokens(user: User): Promise<AuthTokens>

@@ -1,12 +1,15 @@
 import { BaseEntity } from 'src/shared/domain/entities/base.entity'
 import { Email } from 'src/modules/iam/domain/value-objects/email.vo'
 import { Account } from './account.entity'
+import { UserRole } from '../enums/user-role.enum'
 
 export interface UserProps {
   username: string
   email: Email
-  avatarUrl?: string | null
   fullName: string
+
+  role: UserRole
+  avatarUrl?: string | null
 }
 
 export class User extends BaseEntity {
@@ -20,7 +23,7 @@ export class User extends BaseEntity {
   }
 
   // Factory Method: Criação de um NOVO usuário
-  static create(props: { username: string; email: string; fullName: string; avatarUrl?: string }) {
+  static create(props: { username: string; email: string; fullName: string; avatarUrl?: string; role?: UserRole }) {
     if (props.username.length < 3) {
       throw new Error('Username must be at least 3 characters long')
     }
@@ -30,6 +33,7 @@ export class User extends BaseEntity {
       fullName: props.fullName,
       email: Email.create(props.email), // Validação acontece aqui
       avatarUrl: props.avatarUrl ?? null,
+      role: props.role ?? UserRole.USER,
     })
   }
 
@@ -40,6 +44,7 @@ export class User extends BaseEntity {
       email: string
       fullName: string
       avatarUrl?: string | null
+      role?: UserRole
     },
     id: number,
   ) {
@@ -47,6 +52,7 @@ export class User extends BaseEntity {
       {
         ...props,
         email: Email.create(props.email), // Revalida ou cria instância direta
+        role: props.role ?? UserRole.USER,
       },
       id,
     )
@@ -54,6 +60,10 @@ export class User extends BaseEntity {
 
   addAccount(account: Account) {
     this._accounts.push(account)
+  }
+
+  get role() {
+    return this.props.role
   }
 
   get accounts() {

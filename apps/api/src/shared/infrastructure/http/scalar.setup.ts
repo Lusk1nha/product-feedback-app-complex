@@ -8,6 +8,7 @@ export function setupSwaggerWithScalar(app: INestApplication, route: string) {
     .setDescription('The product feedback API description')
     .setVersion('1.0')
     .addTag('product-feedback')
+    .addBearerAuth()
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
