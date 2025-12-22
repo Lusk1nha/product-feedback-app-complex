@@ -1,16 +1,16 @@
 import * as request from 'supertest'
 import * as cookieParser from 'cookie-parser'
-import * as schema from '../../src/shared/infrastructure/database/schema'
+import * as schema from '../../../src/shared/infrastructure/database/schema'
 
 import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication, ValidationPipe } from '@nestjs/common'
-import { AppModule } from '../../src/app.module'
-import { DRIZZLE_PROVIDER } from '../../src/shared/infrastructure/database/database.module'
+import { AppModule } from '../../../src/app.module'
+import { DRIZZLE_PROVIDER } from '../../../src/shared/infrastructure/database/database.module'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
-import { DomainExceptionFilter } from '../../src/shared/infrastructure/http/filters/domain-exception.filter'
-import { UserFactory } from '../factories/user.factory'
-import { RegisterUseCase } from '../../src/modules/iam/application/use-cases/auth/register.usecase'
+import { DomainExceptionFilter } from '../../../src/shared/infrastructure/http/filters/domain-exception.filter'
+import { UserFactory } from '../../factories/user.factory'
+import { RegisterUseCase } from '../../../src/modules/iam/application/use-cases/auth/register.usecase'
 
 describe('Authentication - Login (E2E)', () => {
   let app: INestApplication
@@ -25,7 +25,13 @@ describe('Authentication - Login (E2E)', () => {
 
     app = moduleFixture.createNestApplication()
     app.use(cookieParser())
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }))
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
+    )
     app.useGlobalFilters(new DomainExceptionFilter())
 
     await app.init()
@@ -61,7 +67,9 @@ describe('Authentication - Login (E2E)', () => {
 
       expect(response.body).toEqual({ message: 'Logged in successfully' })
 
-      const cookies = (response.headers['set-cookie'] as unknown as string[]).join(';')
+      const cookies = (
+        response.headers['set-cookie'] as unknown as string[]
+      ).join(';')
       expect(cookies).toContain('accessToken=')
       expect(cookies).toContain('refreshToken=')
       expect(cookies).toContain('HttpOnly')

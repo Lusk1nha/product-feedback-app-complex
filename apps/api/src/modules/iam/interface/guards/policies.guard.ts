@@ -1,17 +1,32 @@
-import { CanActivate, ExecutionContext, Injectable, Inject } from '@nestjs/common'
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Inject,
+} from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { PERMISSION_SERVICE, IPermissionService, Action } from '../../application/ports/permission.service.interface'
-import { CHECK_POLICIES_KEY, PolicyHandler } from '../decorators/check-policies.decorator'
+import {
+  PERMISSION_SERVICE,
+  IPermissionService,
+} from '../../application/ports/permission.service.interface'
+import {
+  CHECK_POLICIES_KEY,
+  PolicyHandler,
+} from '../decorators/check-policies.decorator'
 
 @Injectable()
 export class PoliciesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    @Inject(PERMISSION_SERVICE) private readonly permissionService: IPermissionService, // Usamos a Interface!
+    @Inject(PERMISSION_SERVICE)
+    private readonly permissionService: IPermissionService, // Usamos a Interface!
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const policyHandlers = this.reflector.get<PolicyHandler[]>(CHECK_POLICIES_KEY, context.getHandler())
+    const policyHandlers = this.reflector.get<PolicyHandler[]>(
+      CHECK_POLICIES_KEY,
+      context.getHandler(),
+    )
 
     // Se não tiver regras na rota, passa (ou bloqueia, sua escolha)
     if (!policyHandlers) {

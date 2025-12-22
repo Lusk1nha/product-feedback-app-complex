@@ -1,7 +1,10 @@
 import { BaseEntity } from 'src/shared/domain/entities/base.entity'
 import { Email } from 'src/modules/iam/domain/value-objects/email.vo'
+
 import { Account } from './account.entity'
 import { UserRole } from '../enums/user-role.enum'
+
+import { UserUsernameTooShortError } from '../errors/user-username-too-short.error'
 
 export interface UserProps {
   username: string
@@ -23,9 +26,15 @@ export class User extends BaseEntity {
   }
 
   // Factory Method: Criação de um NOVO usuário
-  static create(props: { username: string; email: string; fullName: string; avatarUrl?: string; role?: UserRole }) {
+  static create(props: {
+    username: string
+    email: string
+    fullName: string
+    avatarUrl?: string
+    role?: UserRole
+  }) {
     if (props.username.length < 3) {
-      throw new Error('Username must be at least 3 characters long')
+      throw new UserUsernameTooShortError()
     }
 
     return new User({
@@ -56,6 +65,28 @@ export class User extends BaseEntity {
       },
       id,
     )
+  }
+
+  update(params: {
+    username?: string
+    fullName?: string
+    avatarUrl?: string | null
+  }) {
+    if (params.username !== undefined) {
+      if (params.username.length < 3) {
+        throw new UserUsernameTooShortError()
+      }
+
+      this.props.username = params.username
+    }
+
+    if (params.fullName !== undefined) {
+      this.props.fullName = params.fullName
+    }
+
+    if (params.avatarUrl !== undefined) {
+      this.props.avatarUrl = params.avatarUrl
+    }
   }
 
   addAccount(account: Account) {

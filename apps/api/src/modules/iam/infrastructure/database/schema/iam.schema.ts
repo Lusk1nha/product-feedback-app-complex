@@ -1,4 +1,15 @@
-import { pgTable, serial, varchar, integer, unique, text, timestamp, pgEnum, index } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  serial,
+  varchar,
+  integer,
+  unique,
+  text,
+  timestamp,
+  pgEnum,
+  index,
+  boolean,
+} from 'drizzle-orm/pg-core'
 import { relations, sql } from 'drizzle-orm'
 
 // --- Helpers ---
@@ -12,6 +23,8 @@ export const userRoleEnum = pgEnum('user_role', ['ADMIN', 'USER'])
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
+  enabled: boolean('enabled').notNull().default(true),
+
   username: varchar('username', { length: 50 }).notNull().unique(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   fullName: varchar('full_name', { length: 100 }).notNull(),
@@ -33,8 +46,11 @@ export const accounts = pgTable(
     userId: integer('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+
     provider: varchar('provider', { length: 50 }).notNull(),
-    providerAccountId: varchar('provider_account_id', { length: 255 }).notNull(),
+    providerAccountId: varchar('provider_account_id', {
+      length: 255,
+    }).notNull(),
     password: text('password'),
 
     createdAt: timestamp('created_at', timestampConfig).defaultNow().notNull(),

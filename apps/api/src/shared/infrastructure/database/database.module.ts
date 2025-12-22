@@ -15,7 +15,9 @@ export const DRIZZLE_PROVIDER = Symbol('DRIZZLE_PROVIDER')
       provide: DRIZZLE_PROVIDER,
       inject: [ConfigService],
       useFactory: async (configService: ConfigService<Env, true>) => {
-        const connectionString = configService.get('DATABASE_URL', { infer: true })
+        const connectionString = configService.get('DATABASE_URL', {
+          infer: true,
+        })
 
         const pool = new Pool({ connectionString })
 

@@ -3,7 +3,11 @@ import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { Env } from 'src/shared/infrastructure/environment/env.schema'
 import { User } from '../../domain/entities/user.entity'
-import { AuthTokens, ITokenProvider, TokenPayload } from '../../application/ports/token.provider.interface'
+import {
+  AuthTokens,
+  ITokenProvider,
+  TokenPayload,
+} from '../../application/ports/token.provider.interface'
 import { InvalidRefreshTokenError } from '../../domain/errors/invalid-refresh-token.error'
 
 @Injectable()
@@ -39,7 +43,11 @@ export class JwtTokenService implements ITokenProvider {
     }
   }
 
-  private async signToken(payload: TokenPayload, secretKey: keyof Env, expirationKey: keyof Env): Promise<string> {
+  private async signToken(
+    payload: TokenPayload,
+    secretKey: keyof Env,
+    expirationKey: keyof Env,
+  ): Promise<string> {
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get(secretKey, { infer: true }),
       expiresIn: this.configService.get(expirationKey, { infer: true }),

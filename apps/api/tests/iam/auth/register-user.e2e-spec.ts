@@ -1,10 +1,10 @@
 import * as request from 'supertest'
-import * as schema from '../../src/shared/infrastructure/database/schema'
+import * as schema from '../../../src/shared/infrastructure/database/schema'
 
 import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication, ValidationPipe } from '@nestjs/common' // Importe ValidationPipe
-import { AppModule } from '../../src/app.module'
-import { DRIZZLE_PROVIDER } from '../../src/shared/infrastructure/database/database.module'
+import { AppModule } from '../../../src/app.module'
+import { DRIZZLE_PROVIDER } from '../../../src/shared/infrastructure/database/database.module'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { sql } from 'drizzle-orm'
 import { faker } from '@faker-js/faker'
@@ -51,7 +51,10 @@ describe('Authentication - Register User (E2E)', () => {
       fullName: faker.person.fullName(),
     }
 
-    const response = await request(app.getHttpServer()).post('/auth/register').send(payload).expect(201)
+    const response = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(payload)
+      .expect(201)
 
     expect(response.statusCode).toBe(201)
   })
@@ -79,7 +82,10 @@ describe('Authentication - Register User (E2E)', () => {
     }
 
     // Agora o Filter vai pegar o UserAlreadyExistsError e transformar em 409
-    await request(app.getHttpServer()).post('/auth/register').send(payload).expect(409)
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(payload)
+      .expect(409)
   })
 
   it('/auth/register (POST) - Fail (Validation)', async () => {
@@ -91,6 +97,9 @@ describe('Authentication - Register User (E2E)', () => {
     }
 
     // ValidationPipe pega isso antes do domínio
-    await request(app.getHttpServer()).post('/auth/register').send(payload).expect(400)
+    await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(payload)
+      .expect(400)
   })
 })

@@ -58,7 +58,9 @@ describe('RegisterUseCase', () => {
     mockHashingService.hash.mockResolvedValue('hashed-password-123') // Simula o hash
 
     // Simula o create retornando o user (O repositorio real agora retorna User, não Account junto no retorno direto do create se seguir a interface antiga, mas vamos assumir sucesso)
-    mockUserRepository.create.mockImplementation((user) => Promise.resolve(user))
+    mockUserRepository.create.mockImplementation((user) =>
+      Promise.resolve(user),
+    )
 
     // Act
     const result = await useCase.execute(command)
@@ -84,7 +86,9 @@ describe('RegisterUseCase', () => {
     mockUserRepository.findByEmail.mockResolvedValue({ id: 1, ...command })
 
     // Act & Assert
-    await expect(useCase.execute(command)).rejects.toThrow(UserAlreadyExistsError)
+    await expect(useCase.execute(command)).rejects.toThrow(
+      UserAlreadyExistsError,
+    )
 
     // Verifica que NÃO tentou fazer hash nem salvar
     expect(mockHashingService.hash).not.toHaveBeenCalled()

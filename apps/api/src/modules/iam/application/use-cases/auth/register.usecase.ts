@@ -1,20 +1,25 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { User } from 'src/modules/iam/domain/entities/user.entity'
-import { IUserRepository, USER_REPOSITORY } from 'src/modules/iam/domain/repositories/user.repository.interface'
+import {
+  IUserRepository,
+  USER_REPOSITORY,
+} from 'src/modules/iam/domain/repositories/user.repository.interface'
 import { UserAlreadyExistsError } from 'src/modules/iam/domain/errors/user-already-exists.error'
 import { HashingService } from 'src/shared/application/services/hash.service'
 import { Account } from 'src/modules/iam/domain/entities/account.entity'
+import { IUseCase } from 'src/shared/application/interfaces/use-case.interface'
 
 export interface RegisterCommand {
   username: string
   email: string
   fullName: string
   password: string
+
   avatarUrl?: string
 }
 
 @Injectable()
-export class RegisterUseCase {
+export class RegisterUseCase implements IUseCase<RegisterCommand, User> {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
     private readonly hashingService: HashingService,

@@ -1,4 +1,9 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common'
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpStatus,
+} from '@nestjs/common'
 import { Response } from 'express'
 import { ApplicationError } from 'src/shared/domain/errors/application.error'
 import { RefreshTokenNotFoundError } from 'src/modules/iam/infrastructure/http/errors/refresh-token-not-found.error'
@@ -13,7 +18,8 @@ export class ApplicationExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
 
-    const status = this.errorStatusMap[exception.constructor.name] || HttpStatus.BAD_REQUEST
+    const status =
+      this.errorStatusMap[exception.constructor.name] || HttpStatus.BAD_REQUEST
 
     response.status(status).json({
       statusCode: status,

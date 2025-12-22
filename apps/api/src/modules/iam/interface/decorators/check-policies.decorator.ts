@@ -6,4 +6,5 @@ export type PolicyHandler = (ability: IPermissionService, user: User) => boolean
 
 export const CHECK_POLICIES_KEY = 'check_policies'
 
-export const CheckPolicies = (...handlers: PolicyHandler[]) => SetMetadata(CHECK_POLICIES_KEY, handlers)
+export const CheckPolicies = (...handlers: PolicyHandler[]) =>
+  SetMetadata(CHECK_POLICIES_KEY, handlers)

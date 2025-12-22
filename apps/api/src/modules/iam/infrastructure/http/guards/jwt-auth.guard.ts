@@ -10,7 +10,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (err || !user) {
       // 1. Token Expirado
       if (info instanceof TokenExpiredError) {
-        throw new UnauthorizedException('The access token has expired. Please log in again or use the refresh token.')
+        throw new UnauthorizedException(
+          'The access token has expired. Please log in again or use the refresh token.',
+        )
       }
 
       // 2. Token Malformado ou Inválido

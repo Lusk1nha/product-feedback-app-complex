@@ -43,6 +43,13 @@
       "when": 1766369696706,
       "tag": "0005_moaning_violations",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1766442736504,
+      "tag": "0006_special_crystal",
+      "breakpoints": true
     }
   ]
 }

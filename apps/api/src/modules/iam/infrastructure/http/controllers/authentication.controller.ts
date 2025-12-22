@@ -1,8 +1,15 @@
 import { CookieOptions, Response } from 'express'
 
-import { Body, Controller, HttpCode, HttpStatus, Post, Res } from '@nestjs/common'
-import { LoginDto } from '../dtos/login.dto'
-import { RegisterUserDto } from '../dtos/register-user.dto'
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Res,
+} from '@nestjs/common'
+import { LoginDto } from '../dtos/auth/login.dto'
+import { RegisterUserDto } from '../dtos/auth/register-user.dto'
 import { Cookies } from 'src/shared/infrastructure/http/decorators/cookies.decorator'
 import { RefreshTokenUseCase } from '../../../application/use-cases/auth/refresh-token.usecase'
 import { UnauthorizedException } from '@nestjs/common'
@@ -22,10 +29,16 @@ export class AuthenticationController {
     private readonly logoutUseCase: LogoutUseCase,
   ) {}
 
-  @ApiOperation({ summary: 'Register', description: 'Registers a new user and returns access and refresh tokens' })
+  @ApiOperation({
+    summary: 'Register',
+    description: 'Registers a new user and returns access and refresh tokens',
+  })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() dto: RegisterUserDto, @Res({ passthrough: true }) response: Response) {
+  async register(
+    @Body() dto: RegisterUserDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     await this.registerUseCase.execute({
       username: dto.username,
       email: dto.email,
@@ -43,20 +56,33 @@ export class AuthenticationController {
     return { message: 'User created successfully' }
   }
 
-  @ApiOperation({ summary: 'Login', description: 'Logs in the user and returns access and refresh tokens' })
+  @ApiOperation({
+    summary: 'Login',
+    description: 'Logs in the user and returns access and refresh tokens',
+  })
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) response: Response) {
-    const { accessToken, refreshToken } = await this.loginUseCase.execute(loginDto)
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { accessToken, refreshToken } =
+      await this.loginUseCase.execute(loginDto)
     this.setCookies(response, accessToken, refreshToken)
 
     return { message: 'Logged in successfully' }
   }
 
-  @ApiOperation({ summary: 'Refresh Tokens', description: 'Refreshes the access and refresh tokens' })
+  @ApiOperation({
+    summary: 'Refresh Tokens',
+    description: 'Refreshes the access and refresh tokens',
+  })
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Cookies('refreshToken') refreshToken: string, @Res({ passthrough: true }) response: Response) {
+  async refresh(
+    @Cookies('refreshToken') refreshToken: string,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token not found')
     }
@@ -68,10 +94,16 @@ export class AuthenticationController {
     return { message: 'Tokens refreshed successfully' }
   }
 
-  @ApiOperation({ summary: 'Logout', description: 'Clears the cookies and logs out the user' })
+  @ApiOperation({
+    summary: 'Logout',
+    description: 'Clears the cookies and logs out the user',
+  })
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Cookies('refreshToken') refreshToken: string, @Res({ passthrough: true }) response: Response) {
+  async logout(
+    @Cookies('refreshToken') refreshToken: string,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     await this.logoutUseCase.execute({ refreshToken })
 
     const cookieOptions = this.getCookieOptions()
@@ -93,7 +125,11 @@ export class AuthenticationController {
     }
   }
 
-  private setCookies(response: Response, accessToken: string, refreshToken: string) {
+  private setCookies(
+    response: Response,
+    accessToken: string,
+    refreshToken: string,
+  ) {
     const options = this.getCookieOptions()
 
     response.cookie('accessToken', accessToken, {

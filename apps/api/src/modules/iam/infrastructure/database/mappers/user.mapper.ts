@@ -1,3 +1,4 @@
+import { UserRole } from 'src/modules/iam/domain/enums/user-role.enum'
 import { User } from '../../../domain/entities/user.entity'
 import { users } from '../schema/iam.schema'
 
@@ -12,6 +13,8 @@ export class UserMapper {
         email: raw.email,
         fullName: raw.fullName,
         avatarUrl: raw.avatarUrl,
+
+        role: raw.role as UserRole,
       },
       raw.id,
     )
@@ -24,6 +27,8 @@ export class UserMapper {
       email: entity.email.getValue(),
       fullName: entity.fullName,
       avatarUrl: entity.avatarUrl ?? null,
+
+      role: entity.role,
     }
   }
 }

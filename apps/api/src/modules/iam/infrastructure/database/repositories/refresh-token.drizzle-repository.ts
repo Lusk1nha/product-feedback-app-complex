@@ -18,7 +18,10 @@ export class RefreshTokenDrizzleRepository implements IRefreshTokenRepository {
   async create(entity: RefreshToken): Promise<RefreshToken> {
     const data = RefreshTokenMapper.toPersistence(entity)
 
-    const [created] = await this.db.insert(schema.refreshTokens).values(data).returning()
+    const [created] = await this.db
+      .insert(schema.refreshTokens)
+      .values(data)
+      .returning()
 
     return RefreshTokenMapper.toDomain(created)
   }
@@ -34,10 +37,14 @@ export class RefreshTokenDrizzleRepository implements IRefreshTokenRepository {
   }
 
   async deleteByTokenHash(tokenHash: string): Promise<void> {
-    await this.db.delete(schema.refreshTokens).where(eq(schema.refreshTokens.tokenHash, tokenHash))
+    await this.db
+      .delete(schema.refreshTokens)
+      .where(eq(schema.refreshTokens.tokenHash, tokenHash))
   }
 
   async deleteAllByUserId(userId: number): Promise<void> {
-    await this.db.delete(schema.refreshTokens).where(eq(schema.refreshTokens.userId, userId))
+    await this.db
+      .delete(schema.refreshTokens)
+      .where(eq(schema.refreshTokens.userId, userId))
   }
 }

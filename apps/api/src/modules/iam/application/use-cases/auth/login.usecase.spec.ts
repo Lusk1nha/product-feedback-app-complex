@@ -32,7 +32,10 @@ describe('LoginUseCase', () => {
       providers: [
         LoginUseCase,
         { provide: USER_REPOSITORY, useValue: mockUserRepository },
-        { provide: REFRESH_TOKEN_REPOSITORY, useValue: mockRefreshTokenRepository },
+        {
+          provide: REFRESH_TOKEN_REPOSITORY,
+          useValue: mockRefreshTokenRepository,
+        },
         { provide: TOKEN_PROVIDER, useValue: mockTokenProvider },
         { provide: HashingService, useValue: mockHashingService },
       ],
@@ -66,8 +69,13 @@ describe('LoginUseCase', () => {
 
     // Assert - Verificar
     expect(result).toEqual(tokens) // ✅ Comparando com o objeto de retorno
-    expect(mockUserRepository.findByEmailWithAccount).toHaveBeenCalledWith(command.email)
-    expect(mockHashingService.compare).toHaveBeenCalledWith(command.password, 'hashed-password')
+    expect(mockUserRepository.findByEmailWithAccount).toHaveBeenCalledWith(
+      command.email,
+    )
+    expect(mockHashingService.compare).toHaveBeenCalledWith(
+      command.password,
+      'hashed-password',
+    )
     expect(mockTokenProvider.generateAuthTokens).toHaveBeenCalled()
   })
 

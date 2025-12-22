@@ -20,10 +20,21 @@ export function configureSecurity(app: INestApplication) {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: [`'self'`, 'unpkg.com'],
-          styleSrc: [`'self'`, `'unsafe-inline'`, 'cdn.jsdelivr.net', 'fonts.googleapis.com', 'unpkg.com'],
+          styleSrc: [
+            `'self'`,
+            `'unsafe-inline'`,
+            'cdn.jsdelivr.net',
+            'fonts.googleapis.com',
+            'unpkg.com',
+          ],
           fontSrc: [`'self'`, 'fonts.gstatic.com', 'data:'],
           imgSrc: [`'self'`, 'data:', 'cdn.jsdelivr.net'],
-          scriptSrc: [`'self'`, `https: 'unsafe-inline'`, `cdn.jsdelivr.net`, `'unsafe-eval'`],
+          scriptSrc: [
+            `'self'`,
+            `https: 'unsafe-inline'`,
+            `cdn.jsdelivr.net`,
+            `'unsafe-eval'`,
+          ],
         },
       },
     }),
@@ -49,7 +60,10 @@ export function configurePipesAndFilters(app: INestApplication) {
 /**
  * Configurações de CORS
  */
-export function configureCors(app: INestApplication, configService: ConfigService<Env, true>) {
+export function configureCors(
+  app: INestApplication,
+  configService: ConfigService<Env, true>,
+) {
   const frontendUrl = configService.get('FRONTEND_URL', { infer: true })
 
   app.enableCors({
@@ -64,7 +78,10 @@ export function configureCors(app: INestApplication, configService: ConfigServic
 /**
  * Configuração do Swagger/Scalar
  */
-export function configureDocumentation(app: INestApplication, configService: ConfigService<Env, true>) {
+export function configureDocumentation(
+  app: INestApplication,
+  configService: ConfigService<Env, true>,
+) {
   if (configService.get('NODE_ENV') !== Environment.Production) {
     setupSwaggerWithScalar(app, '/docs')
   }

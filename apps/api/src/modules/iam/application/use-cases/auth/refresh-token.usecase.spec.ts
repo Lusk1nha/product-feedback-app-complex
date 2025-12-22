@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { RefreshTokenCommand, RefreshTokenUseCase } from './refresh-token.usecase'
+import {
+  RefreshTokenCommand,
+  RefreshTokenUseCase,
+} from './refresh-token.usecase'
 import { USER_REPOSITORY } from 'src/modules/iam/domain/repositories/user.repository.interface'
 import { TOKEN_PROVIDER } from '../../ports/token.provider.interface'
 import { UserNotFoundError } from 'src/modules/iam/domain/errors/user-not-found.error'
@@ -88,7 +91,9 @@ describe('RefreshTokenUseCase', () => {
 
     // Assert
     expect(result).toEqual(newTokens)
-    expect(mockTokenProvider.verifyRefreshToken).toHaveBeenCalledWith(command.refreshToken)
+    expect(mockTokenProvider.verifyRefreshToken).toHaveBeenCalledWith(
+      command.refreshToken,
+    )
     expect(mockUserRepository.findById).toHaveBeenCalledWith(payload.sub)
     expect(mockTokenProvider.generateAuthTokens).toHaveBeenCalledWith(user)
   })
@@ -98,10 +103,14 @@ describe('RefreshTokenUseCase', () => {
     const command = { refreshToken: 'invalid-token' }
 
     // Simulamos o Provider lançando erro (ex: token expirado)
-    mockTokenProvider.verifyRefreshToken.mockRejectedValue(new InvalidRefreshTokenError())
+    mockTokenProvider.verifyRefreshToken.mockRejectedValue(
+      new InvalidRefreshTokenError(),
+    )
 
     // Act & Assert
-    await expect(useCase.execute(command)).rejects.toThrow(InvalidRefreshTokenError)
+    await expect(useCase.execute(command)).rejects.toThrow(
+      InvalidRefreshTokenError,
+    )
 
     // Garante que parou o fluxo e não foi no banco
     expect(mockUserRepository.findById).not.toHaveBeenCalled()

@@ -17,7 +17,11 @@ export class Account extends BaseEntity {
     this.props = props
   }
 
-  static createLocal(props: { email: string; passwordHash: string; userId?: number }) {
+  static createLocal(props: {
+    email: string
+    passwordHash: string
+    userId?: number
+  }) {
     return new Account({
       userId: props.userId ?? 0, // Ou undefined, dependendo de como sua BaseEntity trata
       provider: 'local',
@@ -26,7 +30,11 @@ export class Account extends BaseEntity {
     })
   }
 
-  static createOAuth(userId: number, provider: AuthProvider, providerId: string) {
+  static createOAuth(
+    userId: number,
+    provider: AuthProvider,
+    providerId: string,
+  ) {
     return new Account({
       userId,
       provider,

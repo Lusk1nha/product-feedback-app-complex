@@ -3,6 +3,7 @@ import {
   IRefreshTokenRepository,
   REFRESH_TOKEN_REPOSITORY,
 } from 'src/modules/iam/domain/repositories/refresh-token.repository.interface'
+import { IUseCase } from 'src/shared/application/interfaces/use-case.interface'
 import { HashingService } from 'src/shared/application/services/hash.service'
 
 export interface LogoutCommand {
@@ -10,9 +11,10 @@ export interface LogoutCommand {
 }
 
 @Injectable()
-export class LogoutUseCase {
+export class LogoutUseCase implements IUseCase<LogoutCommand, void> {
   constructor(
-    @Inject(REFRESH_TOKEN_REPOSITORY) private readonly refreshTokenRepo: IRefreshTokenRepository,
+    @Inject(REFRESH_TOKEN_REPOSITORY)
+    private readonly refreshTokenRepo: IRefreshTokenRepository,
     private readonly hashingService: HashingService,
   ) {}
 

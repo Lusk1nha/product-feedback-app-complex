@@ -29,6 +29,8 @@ import { LogoutUseCase } from './application/use-cases/auth/logout.usecase'
 // Auth Strategies
 import { JwtStrategy } from './infrastructure/auth/strategies/jwt.strategy'
 import { GetProfileUseCase } from './application/use-cases/user/get-profile.usecase'
+import { UpdateUserUseCase } from './application/use-cases/user/update-user.usecase'
+import { DeleteUserUseCase } from './application/use-cases/user/delete-user.usecase'
 
 @Module({
   imports: [
@@ -40,7 +42,10 @@ import { GetProfileUseCase } from './application/use-cases/user/get-profile.usec
   providers: [
     // 1. Repositories
     { provide: USER_REPOSITORY, useClass: UserDrizzleRepository },
-    { provide: REFRESH_TOKEN_REPOSITORY, useClass: RefreshTokenDrizzleRepository },
+    {
+      provide: REFRESH_TOKEN_REPOSITORY,
+      useClass: RefreshTokenDrizzleRepository,
+    },
 
     // 2. Infra Services
     { provide: HashingService, useClass: BcryptHashingService },
@@ -50,12 +55,17 @@ import { GetProfileUseCase } from './application/use-cases/user/get-profile.usec
     { provide: PERMISSION_SERVICE, useClass: CaslPermissionService },
 
     // 4. Use Cases
+
+    // Auth
     RegisterUseCase,
     RefreshTokenUseCase,
     LoginUseCase,
     LogoutUseCase,
 
+    // Users
     GetProfileUseCase,
+    UpdateUserUseCase,
+    DeleteUserUseCase,
 
     // 5. Strategies
     JwtStrategy,
