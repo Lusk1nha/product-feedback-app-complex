@@ -12,6 +12,7 @@ import { DomainExceptionFilter } from '../../../src/shared/infrastructure/http/f
 import { UserFactory } from '../../factories/user.factory'
 import { RegisterUseCase } from '../../../src/modules/iam/application/use-cases/auth/register.usecase'
 import { InvalidRefreshTokenError } from 'src/modules/iam/domain/errors/invalid-refresh-token.error'
+import { ThrottlerGuard } from '@nestjs/throttler'
 
 describe('Authentication - Refresh Token (E2E)', () => {
   let app: INestApplication
@@ -22,7 +23,10 @@ describe('Authentication - Refresh Token (E2E)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile()
+    })
+      .overrideGuard(ThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile()
 
     app = moduleFixture.createNestApplication()
     app.use(cookieParser())

@@ -7,6 +7,7 @@ import { Env, Environment } from '../environment/env.schema'
 import { DomainExceptionFilter } from './filters/domain-exception.filter'
 import { setupSwaggerWithScalar } from './scalar.setup'
 import { ApplicationExceptionFilter } from './filters/application-exception.filter'
+import { TransformInterceptor } from './interceptors/transform.interceptor'
 
 /**
  * Configurações de Segurança (Helmet, Cookies)
@@ -55,6 +56,8 @@ export function configurePipesAndFilters(app: INestApplication) {
 
   app.useGlobalFilters(new DomainExceptionFilter())
   app.useGlobalFilters(new ApplicationExceptionFilter())
+
+  app.useGlobalInterceptors(new TransformInterceptor())
 }
 
 /**

@@ -11,6 +11,7 @@ import { sql } from 'drizzle-orm'
 import { DomainExceptionFilter } from '../../../src/shared/infrastructure/http/filters/domain-exception.filter'
 import { UserFactory } from '../../factories/user.factory'
 import { RegisterUseCase } from '../../../src/modules/iam/application/use-cases/auth/register.usecase'
+import { ThrottlerGuard } from '@nestjs/throttler'
 
 describe('Authentication - Login (E2E)', () => {
   let app: INestApplication
@@ -21,7 +22,10 @@ describe('Authentication - Login (E2E)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile()
+    })
+      .overrideGuard(ThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile()
 
     app = moduleFixture.createNestApplication()
     app.use(cookieParser())

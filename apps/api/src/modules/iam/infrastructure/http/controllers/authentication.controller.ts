@@ -1,5 +1,4 @@
 import { CookieOptions, Response } from 'express'
-
 import {
   Body,
   Controller,
@@ -8,6 +7,7 @@ import {
   Post,
   Res,
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { LoginDto } from '../dtos/auth/login.dto'
 import { RegisterUserDto } from '../dtos/auth/register-user.dto'
 import { Cookies } from 'src/shared/infrastructure/http/decorators/cookies.decorator'
@@ -15,9 +15,21 @@ import { RefreshTokenUseCase } from '../../../application/use-cases/auth/refresh
 import { UnauthorizedException } from '@nestjs/common'
 import { LoginUseCase } from '../../../application/use-cases/auth/login.usecase'
 import { RegisterUseCase } from '../../../application/use-cases/auth/register.usecase'
-import { Environment } from 'src/shared/infrastructure/environment/env.schema'
-import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import {
+  ApiOperation,
+  ApiProperty,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger'
 import { LogoutUseCase } from '../../../application/use-cases/auth/logout.usecase'
+import { Throttle } from '@nestjs/throttler'
+import { Env } from 'src/shared/infrastructure/environment/env.schema' // Import do seu Schema
+import { RefreshTokenNotFoundError } from '../errors/refresh-token-not-found.error'
+
+class AuthResponse {
+  @ApiProperty()
+  message: string
+}
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -27,12 +39,16 @@ export class AuthenticationController {
     private readonly loginUseCase: LoginUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly logoutUseCase: LogoutUseCase,
+
+    private readonly configService: ConfigService<Env, true>,
   ) {}
 
   @ApiOperation({
     summary: 'Register',
     description: 'Registers a new user and returns access and refresh tokens',
   })
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @ApiResponse({ status: 201, type: AuthResponse })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(
@@ -60,6 +76,8 @@ export class AuthenticationController {
     summary: 'Login',
     description: 'Logs in the user and returns access and refresh tokens',
   })
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @ApiResponse({ status: 200, type: AuthResponse })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
@@ -77,6 +95,8 @@ export class AuthenticationController {
     summary: 'Refresh Tokens',
     description: 'Refreshes the access and refresh tokens',
   })
+  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 4. Refresh precisa ser mais permissivo (múltiplas abas)
+  @ApiResponse({ status: 200, type: AuthResponse })
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(
@@ -84,7 +104,7 @@ export class AuthenticationController {
     @Res({ passthrough: true }) response: Response,
   ) {
     if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token not found')
+      throw new RefreshTokenNotFoundError()
     }
 
     const tokens = await this.refreshTokenUseCase.execute({ refreshToken })
@@ -104,24 +124,33 @@ export class AuthenticationController {
     @Cookies('refreshToken') refreshToken: string,
     @Res({ passthrough: true }) response: Response,
   ) {
-    await this.logoutUseCase.execute({ refreshToken })
-
-    const cookieOptions = this.getCookieOptions()
-    response.clearCookie('accessToken', cookieOptions)
-    response.clearCookie('refreshToken', cookieOptions)
+    try {
+      if (refreshToken) {
+        await this.logoutUseCase.execute({ refreshToken })
+      }
+    } catch (error) {
+      // Logar o erro silenciosamente, mas não impedir o clearCookie
+      // logger.error('Logout failed inside usecase', error)
+    } finally {
+      const cookieOptions = this.getCookieOptions()
+      response.clearCookie('accessToken', cookieOptions)
+      response.clearCookie('refreshToken', cookieOptions)
+    }
 
     return { message: 'Logged out successfully' }
   }
 
-  // --- Helper Privado para Configuração de Cookies ---
+  // --- Helpers Privados Refatorados ---
+
   private getCookieOptions(): CookieOptions {
-    const isProduction = process.env.NODE_ENV === Environment.Production
+    const isProduction =
+      this.configService.get('NODE_ENV', { infer: true }) === 'production'
 
     return {
       secure: isProduction,
       httpOnly: true,
-      sameSite: isProduction ? 'strict' : 'lax',
-      path: '/', // Crítico: se o path for diferente, o logout falha silenciosamente
+      sameSite: isProduction ? 'lax' : 'lax',
+      path: '/',
     }
   }
 
@@ -134,12 +163,16 @@ export class AuthenticationController {
 
     response.cookie('accessToken', accessToken, {
       ...options,
-      maxAge: 15 * 60 * 1000, // 15 min
+      maxAge:
+        this.configService.get('JWT_ACCESS_EXPIRES_IN_MS', { infer: true }) ||
+        15 * 60 * 1000,
     })
 
     response.cookie('refreshToken', refreshToken, {
       ...options,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
+      maxAge:
+        this.configService.get('JWT_REFRESH_EXPIRES_IN_MS', { infer: true }) ||
+        7 * 24 * 60 * 60 * 1000,
     })
   }
 }

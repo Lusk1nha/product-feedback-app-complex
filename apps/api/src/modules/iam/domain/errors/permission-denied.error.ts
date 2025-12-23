@@ -8,7 +8,6 @@ export class PermissionDeniedError extends DomainError {
       ? `Permission Denied: You cannot ${action} ${subjectName}.`
       : 'Permission Denied.'
 
-    super(message)
-    this.name = 'PermissionDeniedError'
+    super(message, 'PERMISSION_DENIED', { action, subject })
   }
 }
