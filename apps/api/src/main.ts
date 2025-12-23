@@ -3,39 +3,42 @@ import { ConfigService } from '@nestjs/config'
 import { AppModule } from './app.module'
 import { Env } from './shared/infrastructure/environment/env.schema'
 import {
-  configureCors,
-  configureDocumentation,
-  configurePipesAndFilters,
-  configureSecurity,
+	configureCors,
+	configureDocumentation,
+	configurePipesAndFilters,
+	configureResponseDecorators,
+	configureSecurity,
 } from './shared/infrastructure/http/app.setup'
 
 import { Logger } from 'nestjs-pino'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true })
+	const app = await NestFactory.create(AppModule, { bufferLogs: true })
 
-  const logger = app.get(Logger)
-  app.useLogger(logger)
+	const logger = app.get(Logger)
+	app.useLogger(logger)
 
-  const configService = app.get<ConfigService<Env, true>>(ConfigService)
+	const configService = app.get<ConfigService<Env, true>>(ConfigService)
 
-  app.setGlobalPrefix('api')
+	app.setGlobalPrefix('api')
 
-  configureSecurity(app)
-  configurePipesAndFilters(app)
-  configureDocumentation(app, configService)
+	configureSecurity(app)
+	configurePipesAndFilters(app)
+	configureResponseDecorators(app)
 
-  const frontendUrl = configureCors(app, configService)
+	configureDocumentation(app, configService)
 
-  app.enableShutdownHooks()
+	const frontendUrl = configureCors(app, configService)
 
-  const port = configService.get('PORT', { infer: true })
-  await app.listen(port)
+	app.enableShutdownHooks()
 
-  // ✅ Agora a variável 'logger' existe neste escopo
-  logger.log(`🚀 Application is running on: http://localhost:${port}/api`)
-  logger.log(`📑 Swagger documentation: http://localhost:${port}/docs`)
-  logger.log(`🌍 CORS accepting origin: ${frontendUrl}`)
+	const port = configService.get('PORT', { infer: true })
+	await app.listen(port)
+
+	// ✅ Agora a variável 'logger' existe neste escopo
+	logger.log(`🚀 Application is running on: http://localhost:${port}/api`)
+	logger.log(`📑 Swagger documentation: http://localhost:${port}/docs`)
+	logger.log(`🌍 CORS accepting origin: ${frontendUrl}`)
 }
 
 bootstrap()

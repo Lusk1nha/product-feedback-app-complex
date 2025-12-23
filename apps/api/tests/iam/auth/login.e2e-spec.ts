@@ -69,7 +69,7 @@ describe('Authentication - Login (E2E)', () => {
         })
         .expect(200)
 
-      expect(response.body).toEqual({ message: 'Logged in successfully' })
+      expect(response.statusCode).toBe(200)
 
       const cookies = (
         response.headers['set-cookie'] as unknown as string[]

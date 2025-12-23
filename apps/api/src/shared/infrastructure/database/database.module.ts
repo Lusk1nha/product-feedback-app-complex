@@ -10,21 +10,21 @@ export const DRIZZLE_PROVIDER = Symbol('DRIZZLE_PROVIDER')
 
 @Global()
 @Module({
-  providers: [
-    {
-      provide: DRIZZLE_PROVIDER,
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService<Env, true>) => {
-        const connectionString = configService.get('DATABASE_URL', {
-          infer: true,
-        })
+	providers: [
+		{
+			provide: DRIZZLE_PROVIDER,
+			inject: [ConfigService],
+			useFactory: async (configService: ConfigService<Env, true>) => {
+				const connectionString = configService.get('DATABASE_URL', {
+					infer: true,
+				})
 
-        const pool = new Pool({ connectionString })
+				const pool = new Pool({ connectionString })
 
-        return drizzle(pool, { schema })
-      },
-    },
-  ],
-  exports: [DRIZZLE_PROVIDER],
+				return drizzle(pool, { schema })
+			},
+		},
+	],
+	exports: [DRIZZLE_PROVIDER],
 })
 export class DatabaseModule {}

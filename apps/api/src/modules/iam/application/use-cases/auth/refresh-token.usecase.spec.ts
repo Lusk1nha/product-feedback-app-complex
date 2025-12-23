@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import {
-  RefreshTokenCommand,
-  RefreshTokenUseCase,
+	RefreshTokenCommand,
+	RefreshTokenUseCase,
 } from './refresh-token.usecase'
 import { USER_REPOSITORY } from 'src/modules/iam/domain/repositories/user.repository.interface'
 import { TOKEN_PROVIDER } from '../../ports/token.provider.interface'
@@ -13,122 +13,122 @@ import { HashingService } from 'src/shared/application/services/hash.service'
 
 // Mocks
 const mockUserRepository = {
-  findById: jest.fn(),
+	findById: jest.fn(),
 }
 
 const mockTokenProvider = {
-  verifyRefreshToken: jest.fn(),
-  generateAuthTokens: jest.fn(),
+	verifyRefreshToken: jest.fn(),
+	generateAuthTokens: jest.fn(),
 }
 
 const mockRefreshTokenRepository = {
-  create: jest.fn(),
-  findByTokenHash: jest.fn(),
-  deleteByTokenHash: jest.fn(),
+	create: jest.fn(),
+	findByTokenHash: jest.fn(),
+	deleteByTokenHash: jest.fn(),
 }
 
 const mockHashingService = {
-  compare: jest.fn(),
-  hashToken: jest.fn(),
+	compare: jest.fn(),
+	hashToken: jest.fn(),
 }
 
 describe('RefreshTokenUseCase', () => {
-  let useCase: RefreshTokenUseCase
+	let useCase: RefreshTokenUseCase
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        RefreshTokenUseCase,
-        {
-          provide: USER_REPOSITORY,
-          useValue: mockUserRepository,
-        },
-        {
-          provide: REFRESH_TOKEN_REPOSITORY,
-          useValue: mockRefreshTokenRepository,
-        },
-        {
-          provide: TOKEN_PROVIDER,
-          useValue: mockTokenProvider,
-        },
-        {
-          provide: HashingService,
-          useValue: mockHashingService,
-        },
-      ],
-    }).compile()
+	beforeEach(async () => {
+		const module: TestingModule = await Test.createTestingModule({
+			providers: [
+				RefreshTokenUseCase,
+				{
+					provide: USER_REPOSITORY,
+					useValue: mockUserRepository,
+				},
+				{
+					provide: REFRESH_TOKEN_REPOSITORY,
+					useValue: mockRefreshTokenRepository,
+				},
+				{
+					provide: TOKEN_PROVIDER,
+					useValue: mockTokenProvider,
+				},
+				{
+					provide: HashingService,
+					useValue: mockHashingService,
+				},
+			],
+		}).compile()
 
-    useCase = module.get<RefreshTokenUseCase>(RefreshTokenUseCase)
+		useCase = module.get<RefreshTokenUseCase>(RefreshTokenUseCase)
 
-    jest.clearAllMocks()
-  })
+		jest.clearAllMocks()
+	})
 
-  it('should rotate tokens successfully if refresh token and user are valid', async () => {
-    // Arrange
-    const command: RefreshTokenCommand = {
-      refreshToken: 'valid-refresh-token',
-    }
+	it('should rotate tokens successfully if refresh token and user are valid', async () => {
+		// Arrange
+		const command: RefreshTokenCommand = {
+			refreshToken: 'valid-refresh-token',
+		}
 
-    const payload = { sub: 123, email: faker.internet.email() }
-    const user = { id: 123, email: payload.email }
-    const newTokens = { accessToken: 'new-access', refreshToken: 'new-refresh' }
+		const payload = { sub: 123, email: faker.internet.email() }
+		const user = { id: 123, email: payload.email }
+		const newTokens = { accessToken: 'new-access', refreshToken: 'new-refresh' }
 
-    // Configurando comportamento dos mocks
-    mockTokenProvider.verifyRefreshToken.mockResolvedValue(payload)
-    mockUserRepository.findById.mockResolvedValue(user)
-    mockTokenProvider.generateAuthTokens.mockResolvedValue(newTokens)
-    mockRefreshTokenRepository.findByTokenHash.mockResolvedValue({
-      userId: user.id,
-      tokenHash: 'hashed-refresh-token',
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    })
-    mockRefreshTokenRepository.create.mockResolvedValue({})
-    mockRefreshTokenRepository.deleteByTokenHash.mockResolvedValue({})
-    mockHashingService.hashToken.mockResolvedValue('hashed-refresh-token')
+		// Configurando comportamento dos mocks
+		mockTokenProvider.verifyRefreshToken.mockResolvedValue(payload)
+		mockUserRepository.findById.mockResolvedValue(user)
+		mockTokenProvider.generateAuthTokens.mockResolvedValue(newTokens)
+		mockRefreshTokenRepository.findByTokenHash.mockResolvedValue({
+			userId: user.id,
+			tokenHash: 'hashed-refresh-token',
+			expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+		})
+		mockRefreshTokenRepository.create.mockResolvedValue({})
+		mockRefreshTokenRepository.deleteByTokenHash.mockResolvedValue({})
+		mockHashingService.hashToken.mockResolvedValue('hashed-refresh-token')
 
-    // Act
-    const result = await useCase.execute(command)
+		// Act
+		const result = await useCase.execute(command)
 
-    // Assert
-    expect(result).toEqual(newTokens)
-    expect(mockTokenProvider.verifyRefreshToken).toHaveBeenCalledWith(
-      command.refreshToken,
-    )
-    expect(mockUserRepository.findById).toHaveBeenCalledWith(payload.sub)
-    expect(mockTokenProvider.generateAuthTokens).toHaveBeenCalledWith(user)
-  })
+		// Assert
+		expect(result).toEqual(newTokens)
+		expect(mockTokenProvider.verifyRefreshToken).toHaveBeenCalledWith(
+			command.refreshToken,
+		)
+		expect(mockUserRepository.findById).toHaveBeenCalledWith(payload.sub)
+		expect(mockTokenProvider.generateAuthTokens).toHaveBeenCalledWith(user)
+	})
 
-  it('should propagate InvalidRefreshTokenError if provider fails verification', async () => {
-    // Arrange
-    const command = { refreshToken: 'invalid-token' }
+	it('should propagate InvalidRefreshTokenError if provider fails verification', async () => {
+		// Arrange
+		const command = { refreshToken: 'invalid-token' }
 
-    // Simulamos o Provider lançando erro (ex: token expirado)
-    mockTokenProvider.verifyRefreshToken.mockRejectedValue(
-      new InvalidRefreshTokenError(),
-    )
+		// Simulamos o Provider lançando erro (ex: token expirado)
+		mockTokenProvider.verifyRefreshToken.mockRejectedValue(
+			new InvalidRefreshTokenError(),
+		)
 
-    // Act & Assert
-    await expect(useCase.execute(command)).rejects.toThrow(
-      InvalidRefreshTokenError,
-    )
+		// Act & Assert
+		await expect(useCase.execute(command)).rejects.toThrow(
+			InvalidRefreshTokenError,
+		)
 
-    // Garante que parou o fluxo e não foi no banco
-    expect(mockUserRepository.findById).not.toHaveBeenCalled()
-  })
+		// Garante que parou o fluxo e não foi no banco
+		expect(mockUserRepository.findById).not.toHaveBeenCalled()
+	})
 
-  it('should throw UserNotFoundError if token is valid but user was deleted', async () => {
-    // Arrange
-    const command = { refreshToken: 'valid-token' }
+	it('should throw UserNotFoundError if token is valid but user was deleted', async () => {
+		// Arrange
+		const command = { refreshToken: 'valid-token' }
 
-    // Token válido...
-    mockTokenProvider.verifyRefreshToken.mockResolvedValue({ sub: 999 })
-    // ... mas usuário não existe mais no banco
-    mockUserRepository.findById.mockResolvedValue(null)
+		// Token válido...
+		mockTokenProvider.verifyRefreshToken.mockResolvedValue({ sub: 999 })
+		// ... mas usuário não existe mais no banco
+		mockUserRepository.findById.mockResolvedValue(null)
 
-    // Act & Assert
-    await expect(useCase.execute(command)).rejects.toThrow(UserNotFoundError)
+		// Act & Assert
+		await expect(useCase.execute(command)).rejects.toThrow(UserNotFoundError)
 
-    // Garante que NÃO gerou novos tokens
-    expect(mockTokenProvider.generateAuthTokens).not.toHaveBeenCalled()
-  })
+		// Garante que NÃO gerou novos tokens
+		expect(mockTokenProvider.generateAuthTokens).not.toHaveBeenCalled()
+	})
 })

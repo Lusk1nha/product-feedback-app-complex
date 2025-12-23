@@ -14,10 +14,9 @@ import { RegisterUseCase } from '../../../src/modules/iam/application/use-cases/
 import { AuthFactory } from '../../factories/auth.factory'
 import { LoginUseCase } from 'src/modules/iam/application/use-cases/auth/login.usecase'
 
-describe('User - Get Profile (E2E)', () => {
+describe('User - Update (E2E)', () => {
 	let app: INestApplication
 	let db: NodePgDatabase<typeof schema>
-
 	let userFactory: UserFactory
 	let authFactory: AuthFactory
 
@@ -61,12 +60,6 @@ describe('User - Get Profile (E2E)', () => {
 		await app.close()
 	})
 
-	// --- Helpers ---
-
-	/**
-	 * Helper para criar usuário, logar e retornar o token.
-	 * Evita repetição de código nos testes.
-	 */
 	const createAuthenticatedUser = async () => {
 		const { email, originalPassword, user } = await userFactory.make()
 		const { accessToken } = await authFactory.authenticate(
@@ -77,63 +70,30 @@ describe('User - Get Profile (E2E)', () => {
 		return { accessToken, user, email }
 	}
 
-	// --- Testes ---
+	describe('Update User', () => {
+		it('should update user successfully', async () => {
+			const { accessToken, user, email } = await createAuthenticatedUser()
 
-	describe('/users/me (GET)', () => {
-		it('should return user profile and permissions successfully', async () => {
-			// 1. Arrange
-			const { accessToken, email } = await createAuthenticatedUser()
-
-			// 2. Act
 			const response = await request(app.getHttpServer())
-				.get('/users/me') // Ajustado para /users/me conforme padrão REST
+				.put(`/users/${user.id}`)
 				.set('Authorization', `Bearer ${accessToken}`)
+				.send({
+					username: 'new-username',
+					fullName: 'New Full Name',
+					avatarUrl: 'https://example.com/new-avatar.jpg',
+				})
+				.expect(200)
 
-			// 3. Assert
-			expect(response.status).toBe(200)
-
-			// Valida estrutura do retorno (User + Rules)
 			expect(response.body).toEqual({
-				user: expect.objectContaining({
-					email: email,
-					id: expect.any(Number),
-					role: 'USER', // Validando a Role padrão
-				}),
-				rules: expect.any(Array), // Validando que o CASL enviou as regras
+				id: user.id,
+				username: 'new-username',
+				fullName: 'New Full Name',
+				avatarUrl: 'https://example.com/new-avatar.jpg',
+				email: email,
+				role: 'USER',
+				createdAt: expect.any(String),
+				updatedAt: expect.any(String),
 			})
-
-			// Valida se as regras fazem sentido (Ex: pode ler tudo)
-			const hasReadPermission = response.body.rules.some(
-				(r: any) => r.action === 'read' && r.subject === 'all',
-			)
-			expect(hasReadPermission).toBe(true)
-		})
-
-		it('users/me/rules (GET)', async () => {
-			// 1. Arrange
-			const { accessToken } = await createAuthenticatedUser()
-
-			// 2. Act
-			const response = await request(app.getHttpServer())
-				.get('/users/me/rules')
-				.set('Authorization', `Bearer ${accessToken}`)
-
-			// 3. Assert
-			expect(response.status).toBe(200)
-
-			// Valida estrutura do retorno (User + Rules)
-			expect(response.body).toEqual(expect.any(Array))
-		})
-
-		it('should throw 401 Unauthorized when token is missing', async () => {
-			await request(app.getHttpServer()).get('/users/me').expect(401)
-		})
-
-		it('should throw 401 Unauthorized when token is invalid', async () => {
-			await request(app.getHttpServer())
-				.get('/users/me')
-				.set('Authorization', 'Bearer invalid-token-123')
-				.expect(401)
 		})
 	})
 })

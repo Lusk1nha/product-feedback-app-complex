@@ -5,11 +5,11 @@ import { Action } from '../../infrastructure/types/permission.types'
 export const PERMISSION_SERVICE = Symbol('PERMISSION_SERVICE')
 
 export interface IPermissionService {
-  /**
-   * Verifica permissão.
-   * subject: pode ser string ('all', 'Feedback') ou uma instância de entidade.
-   */
-  ensureCan(user: User, action: Action, subject: any): void
+	/**
+	 * Verifica permissão.
+	 * subject: pode ser string ('all', 'Feedback') ou uma instância de entidade.
+	 */
+	ensureCan(user: User, action: Action, subject: any): void
 
-  getRules(user: User): unknown
+	getRules(user: User): unknown
 }

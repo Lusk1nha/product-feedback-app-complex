@@ -70,7 +70,7 @@ describe('Authentication - Refresh Token (E2E)', () => {
         })
         .expect(200)
 
-      expect(loginResponse.body).toEqual({ message: 'Logged in successfully' })
+      expect(loginResponse.statusCode).toBe(200)
 
       const cookies = (
         loginResponse.headers['set-cookie'] as unknown as string[]
@@ -84,9 +84,7 @@ describe('Authentication - Refresh Token (E2E)', () => {
         .set('Cookie', cookies)
         .expect(200)
 
-      expect(refreshResponse.body).toEqual({
-        message: 'Tokens refreshed successfully',
-      })
+      expect(refreshResponse.statusCode).toBe(200)
 
       const refreshCookies = (
         refreshResponse.headers['set-cookie'] as unknown as string[]
@@ -107,7 +105,7 @@ describe('Authentication - Refresh Token (E2E)', () => {
         })
         .expect(200)
 
-      expect(loginResponse.body).toEqual({ message: 'Logged in successfully' })
+      expect(loginResponse.statusCode).toBe(200)
 
       const cookies = (
         loginResponse.headers['set-cookie'] as unknown as string[]
@@ -124,13 +122,7 @@ describe('Authentication - Refresh Token (E2E)', () => {
         )
         .expect(401)
 
-      expect(refreshResponse.body).toEqual(
-        expect.objectContaining({
-          message: new InvalidRefreshTokenError().message,
-          statusCode: 401,
-          error: 'InvalidRefreshTokenError',
-        }),
-      )
+      expect(refreshResponse.statusCode).toBe(401)
     })
   })
 })

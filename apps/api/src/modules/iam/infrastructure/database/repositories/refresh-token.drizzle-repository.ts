@@ -10,41 +10,41 @@ import { RefreshTokenMapper } from '../mappers/refresh-token.mapper'
 
 @Injectable()
 export class RefreshTokenDrizzleRepository implements IRefreshTokenRepository {
-  constructor(
-    @Inject(DRIZZLE_PROVIDER)
-    private readonly db: NodePgDatabase<typeof schema>,
-  ) {}
+	constructor(
+		@Inject(DRIZZLE_PROVIDER)
+		private readonly db: NodePgDatabase<typeof schema>,
+	) {}
 
-  async create(entity: RefreshToken): Promise<RefreshToken> {
-    const data = RefreshTokenMapper.toPersistence(entity)
+	async create(entity: RefreshToken): Promise<RefreshToken> {
+		const data = RefreshTokenMapper.toPersistence(entity)
 
-    const [created] = await this.db
-      .insert(schema.refreshTokens)
-      .values(data)
-      .returning()
+		const [created] = await this.db
+			.insert(schema.refreshTokens)
+			.values(data)
+			.returning()
 
-    return RefreshTokenMapper.toDomain(created)
-  }
+		return RefreshTokenMapper.toDomain(created)
+	}
 
-  async findByTokenHash(tokenHash: string): Promise<RefreshToken | null> {
-    const found = await this.db.query.refreshTokens.findFirst({
-      where: (refreshTokens, { eq }) => eq(refreshTokens.tokenHash, tokenHash),
-    })
+	async findByTokenHash(tokenHash: string): Promise<RefreshToken | null> {
+		const found = await this.db.query.refreshTokens.findFirst({
+			where: (refreshTokens, { eq }) => eq(refreshTokens.tokenHash, tokenHash),
+		})
 
-    if (!found) return null
+		if (!found) return null
 
-    return RefreshTokenMapper.toDomain(found)
-  }
+		return RefreshTokenMapper.toDomain(found)
+	}
 
-  async deleteByTokenHash(tokenHash: string): Promise<void> {
-    await this.db
-      .delete(schema.refreshTokens)
-      .where(eq(schema.refreshTokens.tokenHash, tokenHash))
-  }
+	async deleteByTokenHash(tokenHash: string): Promise<void> {
+		await this.db
+			.delete(schema.refreshTokens)
+			.where(eq(schema.refreshTokens.tokenHash, tokenHash))
+	}
 
-  async deleteAllByUserId(userId: number): Promise<void> {
-    await this.db
-      .delete(schema.refreshTokens)
-      .where(eq(schema.refreshTokens.userId, userId))
-  }
+	async deleteAllByUserId(userId: number): Promise<void> {
+		await this.db
+			.delete(schema.refreshTokens)
+			.where(eq(schema.refreshTokens.userId, userId))
+	}
 }

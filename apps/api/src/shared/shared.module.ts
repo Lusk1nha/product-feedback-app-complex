@@ -3,7 +3,7 @@ import { BcryptHashingService } from './infrastructure/services/bcrypt-hashing.s
 import { HashingService } from './application/services/hash.service'
 
 @Module({
-  providers: [{ provide: HashingService, useClass: BcryptHashingService }],
-  exports: [HashingService],
+	providers: [{ provide: HashingService, useClass: BcryptHashingService }],
+	exports: [HashingService],
 })
 export class SharedModule {}

@@ -4,19 +4,19 @@ import { UserRole } from '../../domain/enums/user-role.enum'
 export const TOKEN_PROVIDER = Symbol('TOKEN_PROVIDER')
 
 export interface AuthTokens {
-  accessToken: string
-  refreshToken: string
+	accessToken: string
+	refreshToken: string
 }
 
 export interface TokenPayload {
-  sub: number
-  email: string
+	sub: number
+	email: string
 
-  role: UserRole
+	role: UserRole
 }
 
 export interface ITokenProvider {
-  generateAuthTokens(user: User): Promise<AuthTokens>
+	generateAuthTokens(user: User): Promise<AuthTokens>
 
-  verifyRefreshToken(token: string): Promise<TokenPayload>
+	verifyRefreshToken(token: string): Promise<TokenPayload>
 }

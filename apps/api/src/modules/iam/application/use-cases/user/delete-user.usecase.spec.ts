@@ -8,74 +8,74 @@ import { UserRole } from 'src/modules/iam/domain/enums/user-role.enum'
 import { UserNotFoundError } from 'src/modules/iam/domain/errors/user-not-found.error'
 
 const mockUserRepository = {
-  findByIdOrThrow: jest.fn(),
-  delete: jest.fn(),
+	findByIdOrThrow: jest.fn(),
+	delete: jest.fn(),
 }
 
 const mockPermissionService = {
-  ensureCan: jest.fn(),
+	ensureCan: jest.fn(),
 }
 
 describe('DeleteUserUseCase', () => {
-  let useCase: DeleteUserUseCase
+	let useCase: DeleteUserUseCase
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        DeleteUserUseCase,
-        {
-          provide: USER_REPOSITORY,
-          useValue: mockUserRepository,
-        },
-        {
-          provide: PERMISSION_SERVICE,
-          useValue: mockPermissionService,
-        },
-      ],
-    }).compile()
+	beforeEach(async () => {
+		const module: TestingModule = await Test.createTestingModule({
+			providers: [
+				DeleteUserUseCase,
+				{
+					provide: USER_REPOSITORY,
+					useValue: mockUserRepository,
+				},
+				{
+					provide: PERMISSION_SERVICE,
+					useValue: mockPermissionService,
+				},
+			],
+		}).compile()
 
-    useCase = module.get<DeleteUserUseCase>(DeleteUserUseCase)
-    jest.clearAllMocks()
-  })
+		useCase = module.get<DeleteUserUseCase>(DeleteUserUseCase)
+		jest.clearAllMocks()
+	})
 
-  it('should delete user successfully', async () => {
-    const user = User.create({
-      username: faker.internet.username(),
-      email: faker.internet.email(),
-      fullName: faker.person.fullName(),
-      role: UserRole.USER,
-    })
+	it('should delete user successfully', async () => {
+		const user = User.create({
+			username: faker.internet.username(),
+			email: faker.internet.email(),
+			fullName: faker.person.fullName(),
+			role: UserRole.USER,
+		})
 
-    mockUserRepository.findByIdOrThrow.mockResolvedValue(user)
-    mockPermissionService.ensureCan.mockImplementation(() => undefined)
+		mockUserRepository.findByIdOrThrow.mockResolvedValue(user)
+		mockPermissionService.ensureCan.mockImplementation(() => undefined)
 
-    await useCase.execute({
-      currentUser: user,
-      targetUserId: user.id,
-    })
+		await useCase.execute({
+			currentUser: user,
+			targetUserId: user.id,
+		})
 
-    expect(mockUserRepository.delete).toHaveBeenCalledWith(user)
-  })
+		expect(mockUserRepository.delete).toHaveBeenCalledWith(user)
+	})
 
-  it('should throw UserNotFoundError if user is not found', async () => {
-    const user = User.create({
-      username: faker.internet.username(),
-      email: faker.internet.email(),
-      fullName: faker.person.fullName(),
-      role: UserRole.USER,
-    })
+	it('should throw UserNotFoundError if user is not found', async () => {
+		const user = User.create({
+			username: faker.internet.username(),
+			email: faker.internet.email(),
+			fullName: faker.person.fullName(),
+			role: UserRole.USER,
+		})
 
-    mockUserRepository.findByIdOrThrow.mockRejectedValue(
-      new UserNotFoundError(),
-    )
+		mockUserRepository.findByIdOrThrow.mockRejectedValue(
+			new UserNotFoundError(),
+		)
 
-    await expect(
-      useCase.execute({
-        currentUser: user,
-        targetUserId: user.id,
-      }),
-    ).rejects.toThrow(UserNotFoundError)
+		await expect(
+			useCase.execute({
+				currentUser: user,
+				targetUserId: user.id,
+			}),
+		).rejects.toThrow(UserNotFoundError)
 
-    expect(mockUserRepository.delete).not.toHaveBeenCalled()
-  })
+		expect(mockUserRepository.delete).not.toHaveBeenCalled()
+	})
 })

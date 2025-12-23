@@ -5,18 +5,19 @@ import { User } from 'src/modules/iam/domain/entities/user.entity'
 import { faker } from '@faker-js/faker/.'
 import { UserRole } from 'src/modules/iam/domain/enums/user-role.enum'
 import { UserNotFoundError } from 'src/modules/iam/domain/errors/user-not-found.error'
+import { GetUserAvatarUseCase } from './get-user-avatar.usecase'
 
 const mockUserRepository = {
-	findByIdOrThrow: jest.fn(),
+	findAvatarById: jest.fn(),
 }
 
-describe('GetProfileUseCase', () => {
-	let useCase: GetProfileUseCase
+describe('GetUserAvatarUseCase', () => {
+	let useCase: GetUserAvatarUseCase
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
-				GetProfileUseCase,
+				GetUserAvatarUseCase,
 				{
 					provide: USER_REPOSITORY,
 					useValue: mockUserRepository,
@@ -24,11 +25,11 @@ describe('GetProfileUseCase', () => {
 			],
 		}).compile()
 
-		useCase = module.get<GetProfileUseCase>(GetProfileUseCase)
+		useCase = module.get<GetUserAvatarUseCase>(GetUserAvatarUseCase)
 		jest.clearAllMocks()
 	})
 
-	it('should get user profile', async () => {
+	it('should get user avatar', async () => {
 		const userId = 1
 		const emailValue = faker.internet.email()
 
@@ -40,23 +41,19 @@ describe('GetProfileUseCase', () => {
 			role: faker.helpers.enumValue(UserRole),
 		})
 
-		mockUserRepository.findByIdOrThrow.mockResolvedValue(user)
+		mockUserRepository.findAvatarById.mockResolvedValue(user.avatarUrl)
 
-		const result = await useCase.execute({ targetUserId: userId })
+		const result = await useCase.execute({ userId })
 
-		expect(result).toEqual(user)
-		expect(mockUserRepository.findByIdOrThrow).toHaveBeenCalledWith(userId)
+		expect(result).toEqual(user.avatarUrl)
+		expect(mockUserRepository.findAvatarById).toHaveBeenCalledWith(userId)
 	})
 
 	it('should throw UserNotFoundError if user is not found', async () => {
 		const userId = 1
-		mockUserRepository.findByIdOrThrow.mockRejectedValue(
-			new UserNotFoundError(),
-		)
+		mockUserRepository.findAvatarById.mockRejectedValue(new UserNotFoundError())
 
-		await expect(useCase.execute({ targetUserId: userId })).rejects.toThrow(
-			UserNotFoundError,
-		)
-		expect(mockUserRepository.findByIdOrThrow).toHaveBeenCalledWith(userId)
+		await expect(useCase.execute({ userId })).rejects.toThrow(UserNotFoundError)
+		expect(mockUserRepository.findAvatarById).toHaveBeenCalledWith(userId)
 	})
 })

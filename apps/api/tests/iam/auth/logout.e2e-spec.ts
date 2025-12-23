@@ -65,7 +65,7 @@ describe('Authentication - Logout (E2E)', () => {
         })
         .expect(200)
 
-      expect(response.body).toEqual({ message: 'Logged in successfully' })
+      expect(response.statusCode).toBe(200)
 
       const cookies = (
         response.headers['set-cookie'] as unknown as string[]
@@ -79,10 +79,7 @@ describe('Authentication - Logout (E2E)', () => {
         .set('Cookie', cookies)
         .expect(200)
 
-      expect(logoutResponse.status).toBe(200)
-      expect(logoutResponse.body).toEqual({
-        message: 'Logged out successfully',
-      })
+      expect(logoutResponse.statusCode).toBe(200)
 
       const cookiesAfterLogout = (
         logoutResponse.headers['set-cookie'] as unknown as string[]

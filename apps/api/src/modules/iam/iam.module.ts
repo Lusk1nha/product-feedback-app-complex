@@ -31,45 +31,60 @@ import { JwtStrategy } from './infrastructure/auth/strategies/jwt.strategy'
 import { GetProfileUseCase } from './application/use-cases/user/get-profile.usecase'
 import { UpdateUserUseCase } from './application/use-cases/user/update-user.usecase'
 import { DeleteUserUseCase } from './application/use-cases/user/delete-user.usecase'
+import { GetUserAvatarUseCase } from './application/use-cases/user/get-user-avatar.usecase'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { Env } from 'src/shared/infrastructure/environment/env.schema'
 
 @Module({
-  imports: [
-    // Registra o Passport (padrão do NestJS para Auth)
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({}),
-  ],
-  controllers: [UserController, AuthenticationController],
-  providers: [
-    // 1. Repositories
-    { provide: USER_REPOSITORY, useClass: UserDrizzleRepository },
-    {
-      provide: REFRESH_TOKEN_REPOSITORY,
-      useClass: RefreshTokenDrizzleRepository,
-    },
+	imports: [
+		// Registra o Passport (padrão do NestJS para Auth)
+		PassportModule.register({ defaultStrategy: 'jwt' }),
+		JwtModule.registerAsync({
+			imports: [ConfigModule],
+			inject: [ConfigService],
+			useFactory: (configService: ConfigService<Env, true>) => ({
+				secret: configService.get('JWT_ACCESS_SECRET', { infer: true }),
+				signOptions: {
+					expiresIn: configService.get('JWT_ACCESS_EXPIRES_IN_MS', {
+						infer: true,
+					}),
+				},
+			}),
+		}),
+	],
+	controllers: [UserController, AuthenticationController],
+	providers: [
+		// 1. Repositories
+		{ provide: USER_REPOSITORY, useClass: UserDrizzleRepository },
+		{
+			provide: REFRESH_TOKEN_REPOSITORY,
+			useClass: RefreshTokenDrizzleRepository,
+		},
 
-    // 2. Infra Services
-    { provide: HashingService, useClass: BcryptHashingService },
-    { provide: TOKEN_PROVIDER, useClass: JwtTokenService },
+		// 2. Infra Services
+		{ provide: HashingService, useClass: BcryptHashingService },
+		{ provide: TOKEN_PROVIDER, useClass: JwtTokenService },
 
-    // 3. Permission Service (Adicionado para funcionar o CASL)
-    { provide: PERMISSION_SERVICE, useClass: CaslPermissionService },
+		// 3. Permission Service (Adicionado para funcionar o CASL)
+		{ provide: PERMISSION_SERVICE, useClass: CaslPermissionService },
 
-    // 4. Use Cases
+		// 4. Use Cases
 
-    // Auth
-    RegisterUseCase,
-    RefreshTokenUseCase,
-    LoginUseCase,
-    LogoutUseCase,
+		// Auth
+		RegisterUseCase,
+		LoginUseCase,
+		RefreshTokenUseCase,
+		LogoutUseCase,
 
-    // Users
-    GetProfileUseCase,
-    UpdateUserUseCase,
-    DeleteUserUseCase,
+		// Users
+		GetProfileUseCase,
+		GetUserAvatarUseCase,
+		UpdateUserUseCase,
+		DeleteUserUseCase,
 
-    // 5. Strategies
-    JwtStrategy,
-  ],
-  exports: [PERMISSION_SERVICE],
+		// 5. Strategies
+		JwtStrategy,
+	],
+	exports: [PERMISSION_SERVICE, USER_REPOSITORY],
 })
 export class IamModule {}

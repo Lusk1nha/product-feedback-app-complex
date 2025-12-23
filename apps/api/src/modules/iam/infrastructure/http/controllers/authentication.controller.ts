@@ -1,178 +1,186 @@
 import { CookieOptions, Response } from 'express'
 import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Res,
+	Body,
+	Controller,
+	HttpCode,
+	HttpStatus,
+	Post,
+	Res,
+	Logger, // <--- 1. Importar Logger
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { LoginDto } from '../dtos/auth/login.dto'
 import { RegisterUserDto } from '../dtos/auth/register-user.dto'
 import { Cookies } from 'src/shared/infrastructure/http/decorators/cookies.decorator'
 import { RefreshTokenUseCase } from '../../../application/use-cases/auth/refresh-token.usecase'
-import { UnauthorizedException } from '@nestjs/common'
 import { LoginUseCase } from '../../../application/use-cases/auth/login.usecase'
 import { RegisterUseCase } from '../../../application/use-cases/auth/register.usecase'
 import {
-  ApiOperation,
-  ApiProperty,
-  ApiResponse,
-  ApiTags,
+	ApiOperation,
+	ApiProperty,
+	ApiResponse,
+	ApiTags,
+	ApiUnauthorizedResponse, // <--- 2. Documentar erros
+	ApiConflictResponse,
 } from '@nestjs/swagger'
 import { LogoutUseCase } from '../../../application/use-cases/auth/logout.usecase'
 import { Throttle } from '@nestjs/throttler'
-import { Env } from 'src/shared/infrastructure/environment/env.schema' // Import do seu Schema
+import { Env } from 'src/shared/infrastructure/environment/env.schema'
 import { RefreshTokenNotFoundError } from '../errors/refresh-token-not-found.error'
+import { ResponseMessage } from 'src/shared/infrastructure/http/decorators/response.decorator'
+import { CurrentUser } from '../decorators/current-user.decorator'
+import { User } from 'src/modules/iam/domain/entities/user.entity'
 
 class AuthResponse {
-  @ApiProperty()
-  message: string
+	@ApiProperty()
+	message: string
 }
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthenticationController {
-  constructor(
-    private readonly registerUseCase: RegisterUseCase,
-    private readonly loginUseCase: LoginUseCase,
-    private readonly refreshTokenUseCase: RefreshTokenUseCase,
-    private readonly logoutUseCase: LogoutUseCase,
+	private readonly logger = new Logger(AuthenticationController.name)
 
-    private readonly configService: ConfigService<Env, true>,
-  ) {}
+	constructor(
+		private readonly registerUseCase: RegisterUseCase,
+		private readonly loginUseCase: LoginUseCase,
+		private readonly refreshTokenUseCase: RefreshTokenUseCase,
+		private readonly logoutUseCase: LogoutUseCase,
+		private readonly configService: ConfigService<Env, true>,
+	) {}
 
-  @ApiOperation({
-    summary: 'Register',
-    description: 'Registers a new user and returns access and refresh tokens',
-  })
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @ApiResponse({ status: 201, type: AuthResponse })
-  @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  async register(
-    @Body() dto: RegisterUserDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    await this.registerUseCase.execute({
-      username: dto.username,
-      email: dto.email,
-      fullName: dto.fullName,
-      password: dto.password,
-    })
+	@ApiOperation({ summary: 'Register' })
+	@Throttle({ default: { limit: 5, ttl: 60000 } })
+	@ApiResponse({ status: 201, type: AuthResponse })
+	@ApiConflictResponse({ description: 'Email or Username already exists' })
+	@Post('register')
+	@ResponseMessage('User created successfully')
+	@HttpCode(HttpStatus.CREATED)
+	async register(
+		@Body() dto: RegisterUserDto,
+		@Res({ passthrough: true }) response: Response,
+	) {
+		await this.registerUseCase.execute({
+			username: dto.username,
+			email: dto.email,
+			fullName: dto.fullName,
+			password: dto.password,
+		})
 
-    const tokens = await this.loginUseCase.execute({
-      email: dto.email,
-      password: dto.password,
-    })
+		const tokens = await this.loginUseCase.execute({
+			email: dto.email,
+			password: dto.password,
+		})
 
-    this.setCookies(response, tokens.accessToken, tokens.refreshToken)
+		this.setCookies(response, tokens.accessToken, tokens.refreshToken)
 
-    return { message: 'User created successfully' }
-  }
+		return
+	}
 
-  @ApiOperation({
-    summary: 'Login',
-    description: 'Logs in the user and returns access and refresh tokens',
-  })
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @ApiResponse({ status: 200, type: AuthResponse })
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const { accessToken, refreshToken } =
-      await this.loginUseCase.execute(loginDto)
-    this.setCookies(response, accessToken, refreshToken)
+	@ApiOperation({ summary: 'Login' })
+	@Throttle({ default: { limit: 5, ttl: 60000 } })
+	@ApiResponse({ status: 200, type: AuthResponse })
+	@ApiUnauthorizedResponse({ description: 'Invalid credentials' })
+	@Post('login')
+	@ResponseMessage('Logged in successfully')
+	@HttpCode(HttpStatus.OK)
+	async login(
+		@Body() loginDto: LoginDto,
+		@Res({ passthrough: true }) response: Response,
+	) {
+		const { accessToken, refreshToken } =
+			await this.loginUseCase.execute(loginDto)
 
-    return { message: 'Logged in successfully' }
-  }
+		this.setCookies(response, accessToken, refreshToken)
 
-  @ApiOperation({
-    summary: 'Refresh Tokens',
-    description: 'Refreshes the access and refresh tokens',
-  })
-  @Throttle({ default: { limit: 10, ttl: 60000 } }) // 4. Refresh precisa ser mais permissivo (múltiplas abas)
-  @ApiResponse({ status: 200, type: AuthResponse })
-  @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  async refresh(
-    @Cookies('refreshToken') refreshToken: string,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    if (!refreshToken) {
-      throw new RefreshTokenNotFoundError()
-    }
+		return
+	}
 
-    const tokens = await this.refreshTokenUseCase.execute({ refreshToken })
+	@ApiOperation({ summary: 'Refresh Tokens' })
+	@Throttle({ default: { limit: 10, ttl: 60000 } })
+	@ApiResponse({ status: 200, type: AuthResponse })
+	@ApiUnauthorizedResponse({ description: 'Invalid or missing refresh token' })
+	@Post('refresh')
+	@ResponseMessage('Tokens refreshed successfully')
+	@HttpCode(HttpStatus.OK)
+	async refresh(
+		@Cookies('refreshToken') refreshToken: string,
+		@Res({ passthrough: true }) response: Response,
+	) {
+		if (!refreshToken) {
+			throw new RefreshTokenNotFoundError()
+		}
 
-    this.setCookies(response, tokens.accessToken, tokens.refreshToken)
+		const tokens = await this.refreshTokenUseCase.execute({
+			refreshToken,
+		})
 
-    return { message: 'Tokens refreshed successfully' }
-  }
+		this.setCookies(response, tokens.accessToken, tokens.refreshToken)
 
-  @ApiOperation({
-    summary: 'Logout',
-    description: 'Clears the cookies and logs out the user',
-  })
-  @Post('logout')
-  @HttpCode(HttpStatus.OK)
-  async logout(
-    @Cookies('refreshToken') refreshToken: string,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    try {
-      if (refreshToken) {
-        await this.logoutUseCase.execute({ refreshToken })
-      }
-    } catch (error) {
-      // Logar o erro silenciosamente, mas não impedir o clearCookie
-      // logger.error('Logout failed inside usecase', error)
-    } finally {
-      const cookieOptions = this.getCookieOptions()
-      response.clearCookie('accessToken', cookieOptions)
-      response.clearCookie('refreshToken', cookieOptions)
-    }
+		return
+	}
 
-    return { message: 'Logged out successfully' }
-  }
+	@ApiOperation({ summary: 'Logout' })
+	@Post('logout')
+	@ResponseMessage('Logged out successfully')
+	@HttpCode(HttpStatus.OK)
+	async logout(
+		@Cookies('refreshToken') refreshToken: string,
+		@Res({ passthrough: true }) response: Response,
+	) {
+		try {
+			if (refreshToken) {
+				await this.logoutUseCase.execute({ refreshToken })
+			}
+		} catch (error) {
+			this.logger.warn(`Logout failed for token: ${error.message}`, error.stack)
+		} finally {
+			const cookieOptions = this.getCookieOptions()
+			response.clearCookie('accessToken', cookieOptions)
+			response.clearCookie('refreshToken', cookieOptions)
+		}
 
-  // --- Helpers Privados Refatorados ---
+		return
+	}
 
-  private getCookieOptions(): CookieOptions {
-    const isProduction =
-      this.configService.get('NODE_ENV', { infer: true }) === 'production'
+	// --- Helpers Privados ---
 
-    return {
-      secure: isProduction,
-      httpOnly: true,
-      sameSite: isProduction ? 'lax' : 'lax',
-      path: '/',
-    }
-  }
+	private getCookieOptions(): CookieOptions {
+		const isProduction =
+			this.configService.get('NODE_ENV', { infer: true }) === 'production'
 
-  private setCookies(
-    response: Response,
-    accessToken: string,
-    refreshToken: string,
-  ) {
-    const options = this.getCookieOptions()
+		return {
+			secure: isProduction,
+			httpOnly: true,
+			sameSite: isProduction ? 'lax' : 'lax', // Lax é seguro e compatível
+			path: '/',
+		}
+	}
 
-    response.cookie('accessToken', accessToken, {
-      ...options,
-      maxAge:
-        this.configService.get('JWT_ACCESS_EXPIRES_IN_MS', { infer: true }) ||
-        15 * 60 * 1000,
-    })
+	private setCookies(
+		response: Response,
+		accessToken: string,
+		refreshToken: string,
+	) {
+		const options = this.getCookieOptions()
 
-    response.cookie('refreshToken', refreshToken, {
-      ...options,
-      maxAge:
-        this.configService.get('JWT_REFRESH_EXPIRES_IN_MS', { infer: true }) ||
-        7 * 24 * 60 * 60 * 1000,
-    })
-  }
+		const accessTime =
+			Number(
+				this.configService.get('JWT_ACCESS_EXPIRES_IN_MS', { infer: true }),
+			) || 15 * 60 * 1000
+		const refreshTime =
+			Number(
+				this.configService.get('JWT_REFRESH_EXPIRES_IN_MS', { infer: true }),
+			) || 7 * 24 * 60 * 60 * 1000
+
+		response.cookie('accessToken', accessToken, {
+			...options,
+			maxAge: accessTime,
+		})
+
+		response.cookie('refreshToken', refreshToken, {
+			...options,
+			maxAge: refreshTime,
+		})
+	}
 }

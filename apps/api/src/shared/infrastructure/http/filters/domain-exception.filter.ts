@@ -1,60 +1,62 @@
 import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpStatus,
-  Logger, // Logger nativo ou do Pino se injetado
+	ArgumentsHost,
+	Catch,
+	ExceptionFilter,
+	HttpStatus,
+	Logger,
 } from '@nestjs/common'
 import { Request, Response } from 'express'
 import { DomainError } from 'src/shared/domain/errors/domain.error'
 
+// ✅ CORREÇÃO: Usar os códigos em CAIXA_ALTA (SNAKE_CASE)
 const ERROR_STATUS_MAP: Record<string, HttpStatus> = {
-  // Common
-  InvalidEmailError: HttpStatus.BAD_REQUEST,
+	// Common
+	INVALID_EMAIL: HttpStatus.BAD_REQUEST,
 
-  // Auth & Permissions
-  InvalidCredentialsError: HttpStatus.UNAUTHORIZED, // 401
-  InvalidRefreshTokenError: HttpStatus.UNAUTHORIZED, // 401
-  PermissionDeniedError: HttpStatus.FORBIDDEN, // 403
-  UserNotFoundError: HttpStatus.NOT_FOUND, // 404 (Corrigido de 401)
+	// Auth & Permissions
+	INVALID_CREDENTIALS: HttpStatus.UNAUTHORIZED, // <--- Agora vai bater!
+	INVALID_REFRESH_TOKEN: HttpStatus.UNAUTHORIZED,
+	PERMISSION_DENIED: HttpStatus.FORBIDDEN,
+	USER_NOT_FOUND: HttpStatus.NOT_FOUND,
 
-  // Conflicts & Validation
-  UserAlreadyExistsError: HttpStatus.CONFLICT, // 409
-  UserConflictError: HttpStatus.CONFLICT, // 409
-  UserUsernameTooShortError: HttpStatus.BAD_REQUEST, // 400
+	// Conflicts & Validation
+	USER_ALREADY_EXISTS: HttpStatus.CONFLICT,
+	USER_CONFLICT: HttpStatus.CONFLICT,
+	USER_USERNAME_TOO_SHORT: HttpStatus.BAD_REQUEST,
 }
 
 @Catch(DomainError)
 export class DomainExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(DomainExceptionFilter.name)
+	private readonly logger = new Logger(DomainExceptionFilter.name)
 
-  catch(exception: DomainError, host: ArgumentsHost) {
-    const ctx = host.switchToHttp()
-    const response = ctx.getResponse<Response>()
-    const request = ctx.getRequest<Request>()
+	catch(exception: DomainError, host: ArgumentsHost) {
+		const ctx = host.switchToHttp()
+		const response = ctx.getResponse<Response>()
+		const request = ctx.getRequest<Request>()
 
-    // 1. Busca pelo CODE fixo ou pelo nome da classe como fallback
-    const errorCode = exception.code || exception.constructor.name
+		// Prioriza o .code, se não tiver usa o nome da classe, se não tiver 'UNKNOWN'
+		const errorCode = exception.code || exception.constructor.name || 'UNKNOWN'
 
-    // 2. Resolve o Status HTTP
-    const status = ERROR_STATUS_MAP[errorCode] || HttpStatus.BAD_REQUEST
+		// Se não achar no mapa, cai no BAD_REQUEST (400)
+		const status = ERROR_STATUS_MAP[errorCode] || HttpStatus.BAD_REQUEST
 
-    // 3. Log do erro (Crucial para debug em produção)
-    // Se for 500 ou 400 crítico, logamos como error/warn. Se for 404/401 comum, logamos como verbose/debug.
-    if (status >= 500) {
-      this.logger.error(`Domain Error: ${errorCode}`, exception.stack)
-    } else {
-      this.logger.warn(`Domain Error: ${errorCode} - ${exception.message}`)
-    }
+		// --- DICA DE DEBUG ---
+		// Se ainda der erro, descomente isso para ver o que está chegando
+		// this.logger.debug(`Recebido ErrorCode: "${errorCode}" | Mapeado para Status: ${status}`);
 
-    // 4. Resposta padronizada (RFC 7807 inspired)
-    response.status(status).json({
-      statusCode: status,
-      error: errorCode, // Útil para o frontend traduzir mensagens (i18n)
-      message: exception.message,
-      path: request.url, // Ajuda a saber onde deu erro
-      method: request.method,
-      timestamp: new Date().toISOString(),
-    })
-  }
+		if (status >= 500) {
+			this.logger.error(`Domain Error: ${errorCode}`, exception.stack)
+		} else {
+			this.logger.warn(`Domain Error: ${errorCode} - ${exception.message}`)
+		}
+
+		response.status(status).json({
+			statusCode: status,
+			error: errorCode,
+			message: exception.message,
+			path: request.url,
+			method: request.method,
+			timestamp: new Date().toISOString(),
+		})
+	}
 }
