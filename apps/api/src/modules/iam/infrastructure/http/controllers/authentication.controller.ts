@@ -28,8 +28,6 @@ import { Throttle } from '@nestjs/throttler'
 import { Env } from 'src/shared/infrastructure/environment/env.schema'
 import { RefreshTokenNotFoundError } from '../errors/refresh-token-not-found.error'
 import { ResponseMessage } from 'src/shared/infrastructure/http/decorators/response.decorator'
-import { CurrentUser } from '../decorators/current-user.decorator'
-import { User } from 'src/modules/iam/domain/entities/user.entity'
 
 class AuthResponse {
 	@ApiProperty()
@@ -93,7 +91,9 @@ export class AuthenticationController {
 
 		this.setCookies(response, accessToken, refreshToken)
 
-		return
+		return {
+			accessToken,
+		}
 	}
 
 	@ApiOperation({ summary: 'Refresh Tokens' })
@@ -117,7 +117,9 @@ export class AuthenticationController {
 
 		this.setCookies(response, tokens.accessToken, tokens.refreshToken)
 
-		return
+		return {
+			accessToken: tokens.accessToken,
+		}
 	}
 
 	@ApiOperation({ summary: 'Logout' })

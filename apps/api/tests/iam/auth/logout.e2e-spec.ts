@@ -13,80 +13,80 @@ import { UserFactory } from '../../factories/user.factory'
 import { RegisterUseCase } from '../../../src/modules/iam/application/use-cases/auth/register.usecase'
 
 describe('Authentication - Logout (E2E)', () => {
-  let app: INestApplication
-  let db: NodePgDatabase<typeof schema>
+	let app: INestApplication
+	let db: NodePgDatabase<typeof schema>
 
-  let userFactory: UserFactory
+	let userFactory: UserFactory
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile()
+	beforeEach(async () => {
+		const moduleFixture: TestingModule = await Test.createTestingModule({
+			imports: [AppModule],
+		}).compile()
 
-    app = moduleFixture.createNestApplication()
-    app.use(cookieParser())
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        transform: true,
-        forbidNonWhitelisted: true,
-      }),
-    )
-    app.useGlobalFilters(new DomainExceptionFilter())
+		app = moduleFixture.createNestApplication()
+		app.use(cookieParser())
+		app.useGlobalPipes(
+			new ValidationPipe({
+				whitelist: true,
+				transform: true,
+				forbidNonWhitelisted: true,
+			}),
+		)
+		app.useGlobalFilters(new DomainExceptionFilter())
 
-    await app.init()
+		await app.init()
 
-    db = moduleFixture.get(DRIZZLE_PROVIDER)
+		db = moduleFixture.get(DRIZZLE_PROVIDER)
 
-    const registerUseCase = moduleFixture.get(RegisterUseCase)
-    userFactory = new UserFactory(registerUseCase)
-  })
+		const registerUseCase = moduleFixture.get(RegisterUseCase)
+		userFactory = new UserFactory(registerUseCase)
+	})
 
-  afterEach(async () => {
-    await db.execute(sql`TRUNCATE TABLE users RESTART IDENTITY CASCADE`)
-    await db.execute(sql`TRUNCATE TABLE accounts RESTART IDENTITY CASCADE`)
-  })
+	afterEach(async () => {
+		await db.execute(sql`TRUNCATE TABLE users RESTART IDENTITY CASCADE`)
+		await db.execute(sql`TRUNCATE TABLE accounts RESTART IDENTITY CASCADE`)
+	})
 
-  afterAll(async () => {
-    if (app) {
-      await app.close()
-    }
-  })
+	afterAll(async () => {
+		if (app) {
+			await app.close()
+		}
+	})
 
-  describe('/auth/logout (POST)', () => {
-    it('should logout successfully and return httpOnly cookies', async () => {
-      const { email, originalPassword } = await userFactory.make()
+	describe('/auth/logout (POST)', () => {
+		it('should logout successfully and return httpOnly cookies', async () => {
+			const { email, originalPassword } = await userFactory.make()
 
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email,
-          password: originalPassword,
-        })
-        .expect(200)
+			const response = await request(app.getHttpServer())
+				.post('/auth/login')
+				.send({
+					email,
+					password: originalPassword,
+				})
+				.expect(200)
 
-      expect(response.statusCode).toBe(200)
+			expect(response.statusCode).toBe(200)
 
-      const cookies = (
-        response.headers['set-cookie'] as unknown as string[]
-      ).join(';')
-      expect(cookies).toContain('accessToken=')
-      expect(cookies).toContain('refreshToken=')
-      expect(cookies).toContain('HttpOnly')
+			const cookies = (
+				response.headers['set-cookie'] as unknown as string[]
+			).join(';')
+			expect(cookies).toContain('accessToken=')
+			expect(cookies).toContain('refreshToken=')
+			expect(cookies).toContain('HttpOnly')
 
-      const logoutResponse = await request(app.getHttpServer())
-        .post('/auth/logout')
-        .set('Cookie', cookies)
-        .expect(200)
+			const logoutResponse = await request(app.getHttpServer())
+				.post('/auth/logout')
+				.set('Cookie', cookies)
+				.expect(200)
 
-      expect(logoutResponse.statusCode).toBe(200)
+			expect(logoutResponse.statusCode).toBe(200)
 
-      const cookiesAfterLogout = (
-        logoutResponse.headers['set-cookie'] as unknown as string[]
-      ).join(';')
-      expect(cookiesAfterLogout).toContain('accessToken=')
-      expect(cookiesAfterLogout).toContain('refreshToken=')
-      expect(cookiesAfterLogout).toContain('HttpOnly')
-    })
-  })
+			const cookiesAfterLogout = (
+				logoutResponse.headers['set-cookie'] as unknown as string[]
+			).join(';')
+			expect(cookiesAfterLogout).toContain('accessToken=')
+			expect(cookiesAfterLogout).toContain('refreshToken=')
+			expect(cookiesAfterLogout).toContain('HttpOnly')
+		})
+	})
 })

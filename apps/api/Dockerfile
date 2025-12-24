@@ -19,6 +19,8 @@ COPY . .
 COPY --from=dependencies /app/node_modules ./node_modules
 # Compila o NestJS (gera a pasta dist)
 RUN pnpm build
+# Remove pacotes de desenvolvimento para deixar a imagem leve
+RUN pnpm prune --prod
 
 # --- Estágio 4: Imagem Final de Produção ---
 FROM base AS deploy

@@ -9,6 +9,7 @@ import { setupSwaggerWithScalar } from './scalar.setup'
 import { ApplicationExceptionFilter } from './filters/application-exception.filter'
 import { TransformInterceptor } from './interceptors/transform.interceptor'
 import { Reflector } from '@nestjs/core'
+import { HttpExceptionFilter } from './filters/http-exception.filter'
 
 /**
  * Configurações de Segurança (Helmet, Cookies)
@@ -55,8 +56,11 @@ export function configurePipesAndFilters(app: INestApplication) {
 		}),
 	)
 
-	app.useGlobalFilters(new DomainExceptionFilter())
-	app.useGlobalFilters(new ApplicationExceptionFilter())
+	app.useGlobalFilters(
+		new HttpExceptionFilter(),
+		new DomainExceptionFilter(),
+		new ApplicationExceptionFilter(),
+	)
 }
 
 export function configureResponseDecorators(app: INestApplication) {

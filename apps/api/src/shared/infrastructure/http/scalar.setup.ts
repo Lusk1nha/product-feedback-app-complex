@@ -4,7 +4,7 @@ import { apiReference } from '@scalar/nestjs-api-reference'
 
 export function setupSwaggerWithScalar(app: INestApplication, route: string) {
 	const config = new DocumentBuilder()
-		.setTitle('Product Feedback - App')
+		.setTitle('Product Feedback - App - API Reference')
 		.setDescription('The product feedback API description')
 		.setVersion('1.0')
 		.addTag('product-feedback')
@@ -19,7 +19,7 @@ export function setupSwaggerWithScalar(app: INestApplication, route: string) {
 			spec: {
 				content: document,
 			},
-			theme: 'alternate',
+			theme: 'saturn',
 		}),
 	)
 }

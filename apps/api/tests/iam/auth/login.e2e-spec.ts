@@ -14,101 +14,101 @@ import { RegisterUseCase } from '../../../src/modules/iam/application/use-cases/
 import { ThrottlerGuard } from '@nestjs/throttler'
 
 describe('Authentication - Login (E2E)', () => {
-  let app: INestApplication
-  let db: NodePgDatabase<typeof schema>
+	let app: INestApplication
+	let db: NodePgDatabase<typeof schema>
 
-  let userFactory: UserFactory
+	let userFactory: UserFactory
 
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    })
-      .overrideGuard(ThrottlerGuard)
-      .useValue({ canActivate: () => true })
-      .compile()
+	beforeAll(async () => {
+		const moduleFixture: TestingModule = await Test.createTestingModule({
+			imports: [AppModule],
+		})
+			.overrideGuard(ThrottlerGuard)
+			.useValue({ canActivate: () => true })
+			.compile()
 
-    app = moduleFixture.createNestApplication()
-    app.use(cookieParser())
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        transform: true,
-        forbidNonWhitelisted: true,
-      }),
-    )
-    app.useGlobalFilters(new DomainExceptionFilter())
+		app = moduleFixture.createNestApplication()
+		app.use(cookieParser())
+		app.useGlobalPipes(
+			new ValidationPipe({
+				whitelist: true,
+				transform: true,
+				forbidNonWhitelisted: true,
+			}),
+		)
+		app.useGlobalFilters(new DomainExceptionFilter())
 
-    await app.init()
+		await app.init()
 
-    db = moduleFixture.get(DRIZZLE_PROVIDER)
+		db = moduleFixture.get(DRIZZLE_PROVIDER)
 
-    const registerUseCase = moduleFixture.get(RegisterUseCase)
-    userFactory = new UserFactory(registerUseCase)
-  })
+		const registerUseCase = moduleFixture.get(RegisterUseCase)
+		userFactory = new UserFactory(registerUseCase)
+	})
 
-  beforeEach(async () => {
-    await db.execute(sql`TRUNCATE TABLE users RESTART IDENTITY CASCADE`)
-    await db.execute(sql`TRUNCATE TABLE accounts RESTART IDENTITY CASCADE`)
-  })
+	beforeEach(async () => {
+		await db.execute(sql`TRUNCATE TABLE users RESTART IDENTITY CASCADE`)
+		await db.execute(sql`TRUNCATE TABLE accounts RESTART IDENTITY CASCADE`)
+	})
 
-  afterAll(async () => {
-    if (app) {
-      await app.close()
-    }
-  })
+	afterAll(async () => {
+		if (app) {
+			await app.close()
+		}
+	})
 
-  describe('/auth/login (POST)', () => {
-    it('should login successfully and return httpOnly cookies', async () => {
-      const { email, originalPassword } = await userFactory.make()
+	describe('/auth/login (POST)', () => {
+		it('should login successfully and return httpOnly cookies', async () => {
+			const { email, originalPassword } = await userFactory.make()
 
-      const response = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email,
-          password: originalPassword,
-        })
-        .expect(200)
+			const response = await request(app.getHttpServer())
+				.post('/auth/login')
+				.send({
+					email,
+					password: originalPassword,
+				})
+				.expect(200)
 
-      expect(response.statusCode).toBe(200)
+			expect(response.statusCode).toBe(200)
 
-      const cookies = (
-        response.headers['set-cookie'] as unknown as string[]
-      ).join(';')
-      expect(cookies).toContain('accessToken=')
-      expect(cookies).toContain('refreshToken=')
-      expect(cookies).toContain('HttpOnly')
-    })
+			const cookies = (
+				response.headers['set-cookie'] as unknown as string[]
+			).join(';')
+			expect(cookies).toContain('accessToken=')
+			expect(cookies).toContain('refreshToken=')
+			expect(cookies).toContain('HttpOnly')
+		})
 
-    it('should throw 401 with invalid password', async () => {
-      const { email } = await userFactory.make()
+		it('should throw 401 with invalid password', async () => {
+			const { email } = await userFactory.make()
 
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email,
-          password: 'WrongPassword!',
-        })
-        .expect(401)
-    })
+			await request(app.getHttpServer())
+				.post('/auth/login')
+				.send({
+					email,
+					password: 'WrongPassword!',
+				})
+				.expect(401)
+		})
 
-    it('should throw 401 with non-existent email', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: 'ghost@casper.com',
-          password: 'AnyPassword',
-        })
-        .expect(401)
-    })
+		it('should throw 401 with non-existent email', async () => {
+			await request(app.getHttpServer())
+				.post('/auth/login')
+				.send({
+					email: 'ghost@casper.com',
+					password: 'AnyPassword',
+				})
+				.expect(401)
+		})
 
-    it('should throw 400 with invalid email format', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: 'not-an-email',
-          password: 'password',
-        })
-        .expect(400)
-    })
-  })
+		it('should throw 400 with invalid email format', async () => {
+			await request(app.getHttpServer())
+				.post('/auth/login')
+				.send({
+					email: 'not-an-email',
+					password: 'password',
+				})
+				.expect(400)
+		})
+	})
 })

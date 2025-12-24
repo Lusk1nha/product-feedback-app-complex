@@ -25,7 +25,7 @@ import {
 import { GetProfileUseCase } from 'src/modules/iam/application/use-cases/user/get-profile.usecase'
 import { CurrentUser } from '../decorators/current-user.decorator'
 import { User } from 'src/modules/iam/domain/entities/user.entity'
-// Removidos: UseGuards, JwtAuthGuard (agora dentro do @Auth)
+
 import {
 	MeResponse,
 	UserResponse,
@@ -41,7 +41,7 @@ import {
 } from 'src/shared/infrastructure/http/decorators/response.decorator'
 import { GetUserAvatarUseCase } from 'src/modules/iam/application/use-cases/user/get-user-avatar.usecase'
 import { Auth } from 'src/shared/infrastructure/http/decorators/auth.decorator' // <--- O Novo Decorator
-import { UserRole } from 'src/modules/iam/domain/enums/user-role.enum'
+
 import { Response } from 'express'
 
 @ApiTags('Users')
