@@ -1,4 +1,3 @@
-import { IPresenter } from 'src/shared/application/interfaces/presenter.interface'
 import { User } from '../../../domain/entities/user.entity'
 import { UserRole } from '../../../domain/enums/user-role.enum'
 import { ApiProperty } from '@nestjs/swagger'
@@ -55,15 +54,6 @@ export class MeResponse {
 
 	@ApiProperty({ type: [String] })
 	rules: string[]
-}
-
-export class UserAvatarResponse {
-	@ApiProperty({
-		example: 'https://bucket.s3.amazonaws.com/avatar.jpg',
-		nullable: true,
-		description: 'The public URL of the user avatar',
-	})
-	avatarUrl: string | null
 }
 
 export class UserPresenter {

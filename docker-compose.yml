@@ -1,6 +1,43 @@
 services:
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    image: product-feedback-api
+    container_name: product_feedback_api
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgres://postgres:postgres@db:5432/product_feedback
+
+      # Secrets (Mantive os que você já tinha)
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-changeme}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-changeme}
+
+      # ✅ ADICIONE ISTO (Valores padrão para o Docker)
+      # Nota: O formato depende do que seu Zod espera (string '15m' ou number 900)
+      # Se seu schema espera número (segundos), use 900 e 604800.
+      # Se espera string, use '15m' e '7d'.
+      # Vou colocar string que é o padrão do NestJS JWT.
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL: 7d
+
+      # Cookies Expirações (Caso seu código use variáveis diferentes para cookies)
+      # Adicionei estes por precaução baseados no seu código anterior
+      JWT_ACCESS_EXPIRES_IN_MS: 900000
+      JWT_REFRESH_EXPIRES_IN_MS: 604800000
+
+      FRONTEND_URL: http://localhost:3000
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  # --- Database Service (Postgres) ---
   db:
     image: postgres:17
+    container_name: product_feedback_db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -8,4 +45,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      # Persistência de dados (importante para não perder dados ao reiniciar)
+      - postgres_data:/var/lib/postgresql/data
+      # Script de inicialização
       - ./docker/create-test-database.sql:/docker-entrypoint-initdb.d/init.sql
+
+# Definição do Volume Persistente
+volumes:
+  postgres_data:

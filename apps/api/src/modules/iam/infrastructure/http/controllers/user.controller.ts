@@ -50,6 +50,7 @@ export class UserController {
 	constructor(
 		@Inject(PERMISSION_SERVICE)
 		private readonly permissionService: IPermissionService,
+
 		private readonly getProfileUseCase: GetProfileUseCase,
 		private readonly getUserAvatarUseCase: GetUserAvatarUseCase,
 		private readonly updateUserUseCase: UpdateUserUseCase,

@@ -33,7 +33,7 @@ async function bootstrap() {
 	app.enableShutdownHooks()
 
 	const port = configService.get('PORT', { infer: true })
-	await app.listen(port)
+	await app.listen(port, '0.0.0.0')
 
 	// ✅ Agora a variável 'logger' existe neste escopo
 	logger.log(`🚀 Application is running on: http://localhost:${port}/api`)
