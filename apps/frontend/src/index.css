@@ -53,6 +53,7 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+	--color-search-bar: var(--search-bar);
 
 	--radius: 10px;
 	--radius-lg: var(--radius);
@@ -134,6 +135,8 @@
 		--border: #647196;
 		--input: #647196;
 		--ring: #ad1fea;
+
+		--search-bar: #373f68;
 	}
 
 	.dark {
@@ -167,6 +170,8 @@
 		--border: #647196;
 		--input: #647196;
 		--ring: #ad1fea;
+
+		--search-bar: #373f68;
 	}
 
 	* {

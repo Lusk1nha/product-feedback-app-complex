@@ -37,9 +37,13 @@ export function MobileTopBar({
 					onClick={onToggleSidebar}
 				>
 					{isSidebarOpen ? (
-						<X className="size-6" aria-label="Close sidebar" />
+						<X className="size-6" aria-label="Close sidebar" strokeWidth={3} />
 					) : (
-						<Menu className="size-6" aria-label="Open sidebar" />
+						<Menu
+							className="size-6"
+							aria-label="Open sidebar"
+							strokeWidth={3}
+						/>
 					)}
 				</Button>
 			</div>

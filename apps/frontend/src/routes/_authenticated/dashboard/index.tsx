@@ -3,8 +3,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { MobileTopBar } from '@/components/mobile/mobile-top-bar'
 import { MobileSidebar } from '@/components/mobile/mobile-sidebar'
+import { SearchFeedbacksBar } from '@/components/dashboard/search-feedbacks-bar'
+import { FeedbackSort } from '@/modules/feedback/types/feedback.sort'
+
+import { z } from 'zod'
+
+const feedbackSearchSchema = z.object({
+	sort: z.enum(FeedbackSort).optional().default(FeedbackSort.MostUpvotes),
+})
 
 export const Route = createFileRoute('/_authenticated/dashboard/')({
+	validateSearch: (search) => feedbackSearchSchema.parse(search),
 	component: DashboardPage,
 })
 
@@ -25,11 +34,8 @@ export function DashboardPage() {
 				/>
 			</header>
 
-			<main className="container mx-auto px-4 py-8">
-				<h2 className="text-h1 text-foreground">Conteúdo Principal</h2>
-				<p className="text-muted-foreground">
-					A lista de feedbacks vai aqui...
-				</p>
+			<main className="flex flex-col gap-y-8">
+				<SearchFeedbacksBar />
 			</main>
 		</div>
 	)
