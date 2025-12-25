@@ -25,8 +25,8 @@ export function useAuth() {
 
 			toast.success('Successfully logged in!')
 
-			const redirectUrl = search.redirect || '/'
-			navigate({ to: redirectUrl as any, replace: true })
+			const redirectUrl = search.redirect || '/dashboard'
+			navigate({ to: redirectUrl, replace: true })
 		},
 	})
 

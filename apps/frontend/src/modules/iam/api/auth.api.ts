@@ -8,7 +8,7 @@ export const AuthApi = {
 	 * @returns Promise que resolve para LoginResponse
 	 */
 	login: async (data: LoginDto) => {
-		return httpClient.post<AuthResponse>('/auth/login', data)
+		return await httpClient.post<AuthResponse>('/auth/login', data)
 	},
 
 	/**
@@ -17,7 +17,7 @@ export const AuthApi = {
 	 * @returns Promise que resolve para null
 	 */
 	register: async (data: RegisterDto) => {
-		return httpClient.post<AuthResponse>('/auth/register', data)
+		return await httpClient.post<AuthResponse>('/auth/register', data)
 	},
 
 	/**
@@ -25,7 +25,7 @@ export const AuthApi = {
 	 * @returns Promise que resolve para null
 	 */
 	logout: async () => {
-		return httpClient.post<null>('/auth/logout')
+		return await httpClient.post<null>('/auth/logout')
 	},
 
 	/**
@@ -33,6 +33,6 @@ export const AuthApi = {
 	 * @returns Promise que resolve para null
 	 */
 	refreshToken: async () => {
-		return httpClient.post<null>('/auth/refresh')
+		return await httpClient.post<null>('/auth/refresh')
 	},
 }

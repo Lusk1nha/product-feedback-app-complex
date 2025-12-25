@@ -1,0 +1,6 @@
+{
+	"routesDirectory": "./src/routes",
+	"generatedRouteTree": "./src/routeTree.gen.ts",
+	"quoteStyle": "single",
+	"ignore": ["**/__tests__/**", "**/*.test.tsx", "**/*.spec.tsx"]
+}

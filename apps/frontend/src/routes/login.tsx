@@ -28,7 +28,7 @@ export const Route = createFileRoute('/login')({
 
 	beforeLoad: ({ context }) => {
 		if (!context.auth.isLoading && context.auth.isAuthenticated) {
-			throw redirect({ to: '/' })
+			throw redirect({ to: '/dashboard' })
 		}
 	},
 	component: LoginPage,
@@ -56,7 +56,7 @@ const itemVariants: Variants = {
 	},
 }
 
-function LoginPage() {
+export function LoginPage() {
 	const { isLoading, isAuthenticated } = useAuthContext()
 	const navigate = useNavigate()
 
@@ -64,7 +64,7 @@ function LoginPage() {
 
 	useEffect(() => {
 		if (!isLoading && isAuthenticated) {
-			navigate({ to: '/', replace: true })
+			navigate({ to: '/dashboard', replace: true })
 		}
 	}, [isLoading, isAuthenticated, navigate])
 
@@ -98,7 +98,7 @@ function LoginPage() {
 	const onSubmit = (data: LoginDto) => {
 		login.mutate(data, {
 			onSuccess: () => {
-				navigate({ to: '/', replace: true })
+				navigate({ to: '/dashboard', replace: true })
 			},
 
 			onError: (error) => {

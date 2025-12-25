@@ -1,41 +1,39 @@
-/* src/index.css */
-
-/* 1. Importa a Fonte */
 @import '@fontsource/jost/400.css';
-@import '@fontsource/jost/500.css'; /* Usado como Medium */
-@import '@fontsource/jost/600.css'; /* Usado como Semibold */
-@import '@fontsource/jost/700.css'; /* Bold */
+@import '@fontsource/jost/500.css';
+@import '@fontsource/jost/600.css';
+@import '@fontsource/jost/700.css';
 
-/* 2. Importa o Tailwind v4 */
 @import 'tailwindcss';
+
+@plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
 
-/* 3. Importa o plugin de animação (necessário para shadcn) */
-@plugin "tailwindcss-animate";
-
-/* 4. Configuração do TEMA (Substitui o tailwind.config.ts) */
 @theme {
-	/* --- Tipografia Global --- */
+	/* Tipografia */
 	--font-sans: 'Jost', sans-serif;
 
-	/* --- Radius (Arredondamento) --- */
-	--radius-lg: 10px;
-	--radius-md: calc(10px - 2px);
-	--radius-sm: calc(10px - 4px);
-
-	/* --- Cores da Marca (Figma) --- */
+	/* Cores da Marca (Hardcoded para uso específico se necessário) */
 	--color-brand-purple: #ad1fea;
 	--color-brand-blue: #4661e6;
-	--color-brand-navy: #373f68; /* Baseado no RGB correto */
-	--color-brand-dark: #3a4374; /* Texto principal */
-	--color-brand-grey: #647196; /* Texto secundário */
-	--color-brand-light: #f2f4ff; /* Background secundário */
-	--color-brand-lighter: #f7f8fd; /* Background principal */
+	--color-brand-navy: #373f68;
+	--color-brand-dark: #3a4374;
+	--color-brand-grey: #647196;
+	--color-brand-light: #f2f4ff;
+	--color-brand-lighter: #f7f8fd;
 	--color-brand-orange: #f49f85;
 	--color-brand-skyblue: #62bcfa;
 
-	/* --- Cores Semânticas do Shadcn (Mapeadas para variáveis CSS) --- */
+	/* Cores Específicas do Banner Gradiente */
+	--color-gradient-start: #28a7ed; /* Azul */
+	--color-gradient-mid: #a337f6; /* Roxo */
+	--color-gradient-end: #e84d70; /* Rosa/Vermelho */
+
+	/* Cores dos Glows (Luzes) */
+	--color-glow-blue: #7ad8fb;
+	--color-glow-orange: #fbb57a;
+
+	/* Mapeamento para Variáveis Semânticas */
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -55,108 +53,122 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+
+	--radius: 10px;
+	--radius-lg: var(--radius);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-sm: calc(var(--radius) - 4px);
 }
 
-/* 5. Utilitários de Tipografia Customizados (Figma specs exatos) */
-/* No v4 criamos classes assim: */
-
+/* Utilitários de Texto (Figma) */
 @utility text-h1 {
 	font-size: 24px;
 	line-height: 35px;
 	letter-spacing: -0.33px;
 	font-weight: 700;
 }
-
 @utility text-h2 {
 	font-size: 20px;
 	line-height: 29px;
 	letter-spacing: -0.25px;
 	font-weight: 700;
 }
-
 @utility text-h3 {
 	font-size: 18px;
 	line-height: 26px;
 	letter-spacing: -0.25px;
 	font-weight: 700;
 }
-
 @utility text-h4 {
 	font-size: 14px;
 	line-height: 20px;
 	letter-spacing: -0.2px;
 	font-weight: 700;
 }
-
 @utility text-body-1 {
 	font-size: 16px;
 	line-height: 23px;
 	font-weight: 400;
 }
-
 @utility text-body-2 {
 	font-size: 15px;
 	line-height: 22px;
 	font-weight: 400;
 }
-
 @utility text-body-3 {
 	font-size: 13px;
 	line-height: 19px;
-	font-weight: 600; /* Semibold */
+	font-weight: 600;
 }
 
-/* 6. Variáveis CSS (Mapping do Shadcn para as cores da Marca) */
+/* DEFINIÇÃO DOS TEMAS (Aqui acontece a mágica) */
 @layer base {
 	:root {
-		/* Background Principal (#F7F8FD) */
-		--background: #f7f8fd;
-		--foreground: #3a4374; /* Brand Dark */
+		/* LIGHT MODE (Cores originais do Figma) */
+		--background: #f7f8fd; /* brand-lighter */
+		--foreground: #3a4374; /* brand-dark */
 
-		/* Card Branco */
 		--card: #ffffff;
 		--card-foreground: #3a4374;
 
-		/* Popover Branco */
 		--popover: #ffffff;
 		--popover-foreground: #3a4374;
 
-		/* Primary: Roxo (#AD1FEA) */
-		--primary: #ad1fea;
+		/* Primary = Roxo */
+		--primary: #ad1fea; /* brand-purple */
 		--primary-foreground: #ffffff;
 
-		/* Secondary: Azul (#4661E6) */
-		--secondary: #4661e6;
+		/* Secondary = Azul */
+		--secondary: #4661e6; /* brand-blue */
 		--secondary-foreground: #ffffff;
 
-		/* Muted: Light Grey (#F2F4FF) */
-		--muted: #f2f4ff;
-		--muted-foreground: #647196; /* Brand Grey */
+		--muted: #f2f4ff; /* brand-light */
+		--muted-foreground: #647196; /* brand-grey */
 
-		/* Accent (Hover states) */
 		--accent: #f2f4ff;
 		--accent-foreground: #4661e6;
 
-		/* Destructive (Erro/Perigo) */
 		--destructive: #d73737;
 		--destructive-foreground: #ffffff;
 
-		/* Bordas e Inputs */
-		--border: #647196; /* Brand Grey (ou use um tom mais claro se ficar muito forte) */
+		--border: #647196;
 		--input: #647196;
-		--ring: #ad1fea; /* Roxo no focus */
-
-		--radius: 10px;
+		--ring: #ad1fea;
 	}
 
 	.dark {
-		/* Mapeamento Dark Mode (se precisar no futuro) */
-		--background: #373f68; /* Navy */
-		--foreground: #ffffff;
-		/* ... etc ... */
+		/* DARK MODE (Adaptado usando a paleta Navy do Figma) */
+		--background: #373f68; /* brand-navy (Fundo geral escuro) */
+		--foreground: #ffffff; /* Texto branco */
+
+		--card: #3a4374; /* brand-dark (Cartões um pouco mais claros que o fundo) */
+		--card-foreground: #ffffff;
+
+		--popover: #3a4374;
+		--popover-foreground: #ffffff;
+
+		/* Primary continua Roxo, mas o texto sobre ele é branco */
+		--primary: #ad1fea;
+		--primary-foreground: #ffffff;
+
+		/* Secondary continua Azul */
+		--secondary: #4661e6;
+		--secondary-foreground: #ffffff;
+
+		--muted: #3a4374;
+		--muted-foreground: #aebbce; /* Um cinza mais claro para ler no escuro */
+
+		--accent: #3a4374;
+		--accent-foreground: #ffffff;
+
+		--destructive: #e84d4d; /* Um vermelho levemente mais claro */
+		--destructive-foreground: #ffffff;
+
+		--border: #647196;
+		--input: #647196;
+		--ring: #ad1fea;
 	}
 
-	/* Aplica estilos base */
 	* {
 		@apply border-border;
 	}
@@ -164,136 +176,11 @@
 		@apply bg-background text-foreground font-sans;
 	}
 
-	/* Mapeia os headings nativos para as classes do Figma */
-	h1 {
-		@apply text-h1 text-brand-dark;
-	}
-	h2 {
-		@apply text-h2 text-brand-dark;
-	}
-	h3 {
-		@apply text-h3 text-brand-dark;
-	}
+	/* Mapeamento automático dos headers */
+	h1,
+	h2,
+	h3,
 	h4 {
-		@apply text-h4 text-brand-dark;
-	}
-}
-
-@theme inline {
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) + 4px);
-	--radius-2xl: calc(var(--radius) + 8px);
-	--radius-3xl: calc(var(--radius) + 12px);
-	--radius-4xl: calc(var(--radius) + 16px);
-	--color-background: var(--background);
-	--color-foreground: var(--foreground);
-	--color-card: var(--card);
-	--color-card-foreground: var(--card-foreground);
-	--color-popover: var(--popover);
-	--color-popover-foreground: var(--popover-foreground);
-	--color-primary: var(--primary);
-	--color-primary-foreground: var(--primary-foreground);
-	--color-secondary: var(--secondary);
-	--color-secondary-foreground: var(--secondary-foreground);
-	--color-muted: var(--muted);
-	--color-muted-foreground: var(--muted-foreground);
-	--color-accent: var(--accent);
-	--color-accent-foreground: var(--accent-foreground);
-	--color-destructive: var(--destructive);
-	--color-border: var(--border);
-	--color-input: var(--input);
-	--color-ring: var(--ring);
-	--color-chart-1: var(--chart-1);
-	--color-chart-2: var(--chart-2);
-	--color-chart-3: var(--chart-3);
-	--color-chart-4: var(--chart-4);
-	--color-chart-5: var(--chart-5);
-	--color-sidebar: var(--sidebar);
-	--color-sidebar-foreground: var(--sidebar-foreground);
-	--color-sidebar-primary: var(--sidebar-primary);
-	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-	--color-sidebar-accent: var(--sidebar-accent);
-	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-	--color-sidebar-border: var(--sidebar-border);
-	--color-sidebar-ring: var(--sidebar-ring);
-}
-
-:root {
-	--radius: 0.625rem;
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.145 0 0);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.145 0 0);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.145 0 0);
-	--primary: oklch(0.205 0 0);
-	--primary-foreground: oklch(0.985 0 0);
-	--secondary: oklch(0.97 0 0);
-	--secondary-foreground: oklch(0.205 0 0);
-	--muted: oklch(0.97 0 0);
-	--muted-foreground: oklch(0.556 0 0);
-	--accent: oklch(0.97 0 0);
-	--accent-foreground: oklch(0.205 0 0);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.922 0 0);
-	--input: oklch(0.922 0 0);
-	--ring: oklch(0.708 0 0);
-	--chart-1: oklch(0.646 0.222 41.116);
-	--chart-2: oklch(0.6 0.118 184.704);
-	--chart-3: oklch(0.398 0.07 227.392);
-	--chart-4: oklch(0.828 0.189 84.429);
-	--chart-5: oklch(0.769 0.188 70.08);
-	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.145 0 0);
-	--sidebar-primary: oklch(0.205 0 0);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.97 0 0);
-	--sidebar-accent-foreground: oklch(0.205 0 0);
-	--sidebar-border: oklch(0.922 0 0);
-	--sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-	--background: oklch(0.145 0 0);
-	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.205 0 0);
-	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.205 0 0);
-	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.922 0 0);
-	--primary-foreground: oklch(0.205 0 0);
-	--secondary: oklch(0.269 0 0);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.269 0 0);
-	--muted-foreground: oklch(0.708 0 0);
-	--accent: oklch(0.269 0 0);
-	--accent-foreground: oklch(0.985 0 0);
-	--destructive: oklch(0.704 0.191 22.216);
-	--border: oklch(1 0 0 / 10%);
-	--input: oklch(1 0 0 / 15%);
-	--ring: oklch(0.556 0 0);
-	--chart-1: oklch(0.488 0.243 264.376);
-	--chart-2: oklch(0.696 0.17 162.48);
-	--chart-3: oklch(0.769 0.188 70.08);
-	--chart-4: oklch(0.627 0.265 303.9);
-	--chart-5: oklch(0.645 0.246 16.439);
-	--sidebar: oklch(0.205 0 0);
-	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.488 0.243 264.376);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.269 0 0);
-	--sidebar-accent-foreground: oklch(0.985 0 0);
-	--sidebar-border: oklch(1 0 0 / 10%);
-	--sidebar-ring: oklch(0.556 0 0);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-	}
-  body {
-    @apply bg-background text-foreground;
+		@apply text-foreground; /* Usa a cor do tema atual */
 	}
 }

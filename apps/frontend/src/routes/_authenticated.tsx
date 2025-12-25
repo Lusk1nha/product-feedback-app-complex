@@ -4,8 +4,6 @@ import { useAuthContext } from '@/modules/iam/contexts/auth-context'
 
 export const Route = createFileRoute('/_authenticated')({
 	beforeLoad: ({ context, location }) => {
-		// Agora o isLoading é false IMEDIATAMENTE se não tiver token.
-		// O redirecionamento acontece na hora, sem spinner infinito.
 		if (!context.auth.isLoading && !context.auth.isAuthenticated) {
 			throw redirect({
 				to: '/login',

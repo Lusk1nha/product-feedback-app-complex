@@ -52,7 +52,7 @@ const itemVariants: Variants = {
 	},
 }
 
-function RegisterPage() {
+export function RegisterPage() {
 	const { isLoading, isAuthenticated } = useAuthContext()
 	const navigate = useNavigate()
 
@@ -103,7 +103,6 @@ function RegisterPage() {
 
 	return (
 		<div className="min-h-screen flex flex-col items-center justify-center bg-brand-lighter p-4 relative overflow-hidden">
-			{/* Background Decorativo (Blobs animados - Cores invertidas em relação ao login para variar) */}
 			<motion.div
 				animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
 				transition={{ duration: 12, repeat: Infinity }}

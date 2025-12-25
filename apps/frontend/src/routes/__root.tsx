@@ -21,12 +21,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 			<Toaster />
 			{import.meta.env.DEV && (
 				<>
-					<TanStackRouterDevtools position="bottom-right" />
+					{/* <TanStackRouterDevtools position="bottom-right" />
 					<ReactQueryDevtools
 						position="right"
 						buttonPosition="bottom-left"
 						initialIsOpen={false}
-					/>
+					/> */}
 				</>
 			)}
 		</>

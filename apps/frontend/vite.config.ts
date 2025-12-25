@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig, loadEnv } from 'vite' // <--- Importe loadEnv
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -36,6 +37,12 @@ export default defineConfig(({ mode }) => {
 					secure: false,
 				},
 			},
+		},
+		test: {
+			globals: true,
+			environment: 'jsdom',
+			setupFiles: './src/test/setup.ts',
+			css: true, // Importante para Tailwind v4 ser processado nos testes
 		},
 	}
 })
