@@ -27,8 +27,8 @@ export function SearchFeedbacksBar({
 	}
 
 	return (
-		<div className="bg-brand-dark w-full h-14 px-6 flex items-center justify-between">
-			<div className="flex items-center gap-x-8">
+		<div className="bg-brand-dark w-full h-14 px-6 flex items-center justify-between sm:rounded-lg sm:px-3 sm:h-18">
+			<div className="flex items-center gap-x-9.5">
 				<SuggestionsCount count={sugestionsFoundedLength} />
 				<SelectFeedbackSort
 					currentValue={search.sort} // Passa o valor da URL
@@ -38,7 +38,7 @@ export function SearchFeedbacksBar({
 
 			<Button
 				type="button"
-				className="text-h4 font-bold bg-brand-purple hover:bg-brand-purple/80 text-white"
+				className="text-h4 font-bold h-10 bg-brand-purple hover:bg-brand-purple/80 text-white sm:h-11"
 			>
 				+ Add Feedback
 			</Button>
@@ -48,7 +48,7 @@ export function SearchFeedbacksBar({
 
 function SuggestionsCount({ count = 0 }: Readonly<{ count: number }>) {
 	return (
-		<div className="hidden items-center gap-x-2 sm:flex">
+		<div className="hidden items-center gap-x-4 sm:flex text-white">
 			<BulbSvg />
 			<p className="text-h3 font-medium">{`${count} Suggestions`}</p>
 		</div>

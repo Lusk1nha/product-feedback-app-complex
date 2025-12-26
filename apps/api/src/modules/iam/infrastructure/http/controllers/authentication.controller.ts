@@ -54,23 +54,13 @@ export class AuthenticationController {
 	@Post('register')
 	@ResponseMessage('User created successfully')
 	@HttpCode(HttpStatus.CREATED)
-	async register(
-		@Body() dto: RegisterUserDto,
-		@Res({ passthrough: true }) response: Response,
-	) {
+	async register(@Body() dto: RegisterUserDto) {
 		await this.registerUseCase.execute({
 			username: dto.username,
 			email: dto.email,
 			fullName: dto.fullName,
 			password: dto.password,
 		})
-
-		const tokens = await this.loginUseCase.execute({
-			email: dto.email,
-			password: dto.password,
-		})
-
-		this.setCookies(response, tokens.accessToken, tokens.refreshToken)
 
 		return
 	}

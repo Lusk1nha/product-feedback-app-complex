@@ -21,7 +21,9 @@ export function SelectFeedbackSort({
 	return (
 		<div className="flex items-center gap-x-2 relative z-10">
 			{/* 1. O texto estático fica AQUI FORA, totalmente isolado */}
-			<span className="text-body-3 text-brand-light opacity-75">Sort by :</span>
+			<span className="text-body-3 font-normal text-brand-light">
+				Sort by :
+			</span>
 
 			{/* 2. O Popover envolve APENAS a parte clicável */}
 			<SortFeedbackPopover
