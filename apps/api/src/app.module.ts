@@ -12,6 +12,7 @@ import {
 	Environment,
 	Env,
 } from './shared/infrastructure/environment/env.schema'
+import { FeedbackModule } from './modules/feedback/feedback.module'
 
 @Module({
 	imports: [
@@ -80,6 +81,7 @@ import {
 		DatabaseModule,
 		SharedModule,
 		IamModule,
+		FeedbackModule,
 	],
 	controllers: [],
 	providers: [

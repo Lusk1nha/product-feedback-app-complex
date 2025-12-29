@@ -1,10 +1,13 @@
+import { ValueObject } from 'src/shared/domain/value-objects/base.vo'
 import { InvalidEmailError } from '../errors/invalid-email.error'
 
-export class Email {
-	private readonly value: string
+interface EmailProps {
+	value: string
+}
 
-	private constructor(value: string) {
-		this.value = value
+export class Email extends ValueObject<EmailProps> {
+	private constructor(props: EmailProps) {
+		super(props)
 	}
 
 	static create(email: string): Email {
@@ -14,10 +17,14 @@ export class Email {
 			throw new InvalidEmailError(email)
 		}
 
-		return new Email(email.toLowerCase())
+		return new Email({ value: email.toLowerCase() })
 	}
 
 	getValue(): string {
-		return this.value
+		return this.props.value
+	}
+
+	get value(): string {
+		return this.props.value
 	}
 }

@@ -1,17 +1,16 @@
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'motion/react'
 import { useEffect } from 'react'
+import { FeedbackCategorySearchSelector } from '../common/feedback-category-search-selector'
 
 interface MobileSidebarProps {
 	isOpen: boolean
 	onClose: () => void
-	children?: React.ReactNode // Para colocar o conteúdo depois
 }
 
 export function MobileSidebar({
 	isOpen,
 	onClose,
-	children,
 }: Readonly<MobileSidebarProps>) {
 	useEffect(() => {
 		const handleResize = () => {
@@ -56,18 +55,7 @@ export function MobileSidebar({
 						)}
 					>
 						<div className="flex flex-col gap-4">
-							{/* Aqui virá o conteúdo (Filtros, Roadmap, Login, etc) */}
-							{children || (
-								<div className="flex flex-col gap-4">
-									{/* Exemplo de conteúdo placeholder */}
-									<div className="bg-card p-4 rounded-lg">
-										<p className="text-body-1 font-bold">Conteúdo da Sidebar</p>
-										<p className="text-body-3 text-muted-foreground mt-2">
-											Coloque seus filtros de tags e roadmap aqui.
-										</p>
-									</div>
-								</div>
-							)}
+							<FeedbackCategorySearchSelector />
 						</div>
 					</motion.aside>
 				</>

@@ -20,14 +20,6 @@ export const GradientBackground: React.FC<GradientBackgroundProps> = ({
         */
 				'bg-[linear-gradient(108deg,var(--color-gradient-start)_0%,var(--color-gradient-mid)_47%,var(--color-gradient-end)_100%)]',
 
-				/* DICA PARA DARK MODE:
-           Se no futuro você quiser que esse fundo fique "escuro" no modo noturno
-           e perca o gradiente, você adicionaria algo assim:
-           'dark:bg-none dark:bg-sidebar' 
-           
-           Mas, por enquanto, mantemos o gradiente como identidade da marca.
-        */
-
 				className,
 			)}
 			{...props}

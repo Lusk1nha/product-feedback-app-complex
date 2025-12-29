@@ -18,11 +18,11 @@ export const userSchema = z.object({
 	role: RoleEnum, // Adicionado conforme o JSON real
 
 	// Validamos se é uma string de data ISO válida
-	createdAt: z.iso.datetime(),
-	updatedAt: z.iso.datetime(),
+	createdAt: z.coerce.date(),
+	updatedAt: z.coerce.date(),
 })
 
-const ruleSchema = z.object({
+export const ruleSchema = z.object({
 	action: z.string(), // ex: 'read', 'update', 'delete', 'manage'
 	subject: SubjectEnum,
 

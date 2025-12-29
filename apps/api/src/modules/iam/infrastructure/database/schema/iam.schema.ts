@@ -11,10 +11,7 @@ import {
 	boolean,
 } from 'drizzle-orm/pg-core'
 import { relations, sql } from 'drizzle-orm'
-
-// --- Helpers ---
-// Padroniza timestamp para evitar erros de fuso horário
-const timestampConfig = { withTimezone: true, mode: 'date' as const }
+import { timestampConfig } from 'src/shared/infrastructure/database/schema.utils'
 
 // --- Enums ---
 export const userRoleEnum = pgEnum('user_role', ['ADMIN', 'USER'])
