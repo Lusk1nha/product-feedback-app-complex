@@ -27,7 +27,7 @@ export function SearchFeedbacksBar({
 	}
 
 	return (
-		<div className="bg-brand-dark w-full h-14 px-6 flex items-center justify-between sm:rounded-lg sm:px-3 sm:h-18">
+		<div className="bg-brand-dark w-full h-14 px-6 flex items-center justify-between sm:rounded-lg sm:h-18">
 			<div className="flex items-center gap-x-9.5">
 				<SuggestionsCount count={sugestionsFoundedLength} />
 				<SelectFeedbackSort

@@ -45,12 +45,7 @@ export function FeedbackCategorySearchSelector({
 	]
 
 	return (
-		<div
-			className={cn(
-				'bg-white p-6 rounded-lg dark:bg-card shadow-sm shadow-brand-blue/10',
-				className,
-			)}
-		>
+		<div className="bg-white rounded-lg p-6 h-full min-h-[178px] dark:bg-card">
 			<ul className="flex flex-wrap gap-x-2 gap-y-3.5">
 				{categories?.map((category) => {
 					const isActive = currentCategory === category.slug
