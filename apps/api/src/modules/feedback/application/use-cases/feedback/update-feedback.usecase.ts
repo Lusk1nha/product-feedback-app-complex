@@ -12,18 +12,21 @@ import {
 } from 'src/modules/iam/application/ports/permission.service.interface'
 import { Action } from 'src/modules/iam/infrastructure/types/permission.types'
 
-export interface CreateFeedbackCommand {
+interface UpdateFeedbackCommand {
+	targetFeedbackId: number
 	currentUser: User
+
 	params: {
-		title: string
-		description: string
-		categorySlug: string
+		title?: string
+		description?: string
+		categorySlug?: string
+		statusSlug?: string
 	}
 }
 
 @Injectable()
-export class CreateFeedbackUseCase implements IUseCase<
-	CreateFeedbackCommand,
+export class UpdateFeedbackUseCase implements IUseCase<
+	UpdateFeedbackCommand,
 	Feedback
 > {
 	constructor(
@@ -34,22 +37,18 @@ export class CreateFeedbackUseCase implements IUseCase<
 		private readonly permissionService: IPermissionService,
 	) {}
 
-	async execute(command: CreateFeedbackCommand): Promise<Feedback> {
-		this.permissionService.ensureCan(
-			command.currentUser,
-			Action.Create,
-			'Feedback',
+	async execute(command: UpdateFeedbackCommand): Promise<Feedback> {
+		const feedbackToUpdate = await this.feedbackRepository.findByIdOrThrow(
+			command.targetFeedbackId,
 		)
 
-		const newFeedback = Feedback.create({
-			title: command.params.title,
-			description: command.params.description,
-			categorySlug: command.params.categorySlug,
-			authorId: command.currentUser.id,
-		})
+		this.permissionService.ensureCan(
+			command.currentUser,
+			Action.Update,
+			feedbackToUpdate,
+		)
 
-		const savedFeedback = await this.feedbackRepository.create(newFeedback)
-
-		return savedFeedback
+		feedbackToUpdate.update(command.params)
+		return await this.feedbackRepository.update(feedbackToUpdate)
 	}
 }

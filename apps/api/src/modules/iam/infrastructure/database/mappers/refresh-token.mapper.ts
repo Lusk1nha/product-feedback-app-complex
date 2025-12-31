@@ -24,7 +24,6 @@ export class RefreshTokenMapper {
 			userId: entity.userId,
 			tokenHash: entity.tokenHash,
 			expiresAt: entity.expiresAt,
-			// createdAt é gerenciado pelo defaultNow() do banco se for undefined
 		}
 	}
 }

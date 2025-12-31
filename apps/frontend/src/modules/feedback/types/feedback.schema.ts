@@ -40,13 +40,32 @@ export const createFeedbackSchema = z.object({
 		.min(3, 'Title must be at least 3 characters')
 		.max(255, 'Title is too long'),
 
+	description: z
+		.string({ error: 'Description is required' })
+		.min(10, 'Description must be at least 10 characters'),
+
 	categorySlug: z
 		.string({ error: 'Category is required' })
 		.min(1, 'Please select a category'),
+})
+
+export const updateFeedbackSchema = z.object({
+	title: z
+		.string({ error: 'Title is required' })
+		.min(3, 'Title must be at least 3 characters')
+		.max(255, 'Title is too long'),
 
 	description: z
 		.string({ error: 'Description is required' })
 		.min(10, 'Description must be at least 10 characters'),
+
+	categorySlug: z
+		.string({ error: 'Category is required' })
+		.min(1, 'Please select a category'),
+
+	statusSlug: z
+		.string({ error: 'Status is required' })
+		.min(1, 'Please select a status'),
 })
 
 // 2. Schema da ENTIDADE Feedback (Resposta da API)
@@ -73,6 +92,8 @@ export type FeedbackCategory = z.infer<typeof feedbackCategorySchema>
 export type FeedbackStatus = z.infer<typeof feedbackStatusSchema>
 
 export type CreateFeedbackPayload = z.infer<typeof createFeedbackSchema>
+export type UpdateFeedbackPayload = z.infer<typeof updateFeedbackSchema>
+
 export type Feedback = z.infer<typeof feedbackSchema>
 
 export type MetadataResponse = z.infer<typeof metadataResponseSchema>

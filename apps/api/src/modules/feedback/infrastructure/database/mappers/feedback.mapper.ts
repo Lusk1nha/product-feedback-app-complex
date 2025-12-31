@@ -33,8 +33,6 @@ export class FeedbackMapper {
 			statusSlug: entity.statusSlug,
 			upvotesCount: entity.upvotesCount,
 			enabled: entity.enabled,
-			createdAt: entity.createdAt,
-			updatedAt: entity.updatedAt,
 		}
 	}
 }

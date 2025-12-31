@@ -25,7 +25,7 @@ export const feedbackCategories = pgTable('feedback_categories', {
 	updatedAt: timestamp('updated_at', timestampConfig)
 		.defaultNow()
 		.notNull()
-		.$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+		.$onUpdate(() => new Date()),
 })
 
 // 2. Tabela de Status (Lookup Table)
@@ -46,7 +46,7 @@ export const feedbackStatuses = pgTable('feedback_statuses', {
 	updatedAt: timestamp('updated_at', timestampConfig)
 		.defaultNow()
 		.notNull()
-		.$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+		.$onUpdate(() => new Date()),
 })
 
 
@@ -80,7 +80,7 @@ export const feedbacks = pgTable('feedbacks', {
 	updatedAt: timestamp('updated_at', timestampConfig)
 		.defaultNow()
 		.notNull()
-		.$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+		.$onUpdate(() => new Date()),
 })
 
 // 5. Tabela de Upvotes (Table)

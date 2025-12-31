@@ -74,7 +74,6 @@ export function FormSelect<T extends FieldValues>({
 					{/* Componente Select do Radix */}
 					<Select
 						onValueChange={field.onChange} // Conecta ao React Hook Form
-						defaultValue={field.value}
 						value={field.value}
 					>
 						<SelectTrigger
@@ -95,7 +94,7 @@ export function FormSelect<T extends FieldValues>({
 							<SelectValue placeholder={placeholder} />
 						</SelectTrigger>
 
-						<SelectContent>{children}</SelectContent>
+						<SelectContent className="border-none">{children}</SelectContent>
 					</Select>
 				</div>
 			)}

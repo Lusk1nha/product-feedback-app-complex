@@ -61,6 +61,37 @@ export class Feedback extends BaseEntity {
 		return new Feedback(props, id)
 	}
 
+	update(params: {
+		title?: string
+		description?: string
+		categorySlug?: string
+		statusSlug?: string
+	}) {
+		if (params.title !== undefined) {
+			if (params.title.length < 3) {
+				throw new FeedbackTitleTooShortError(3)
+			}
+
+			this.props.title = params.title
+		}
+
+		if (params.description !== undefined) {
+			if (params.description.length < 10) {
+				throw new FeedbackDescriptionTooShortError(10)
+			}
+
+			this.props.description = params.description
+		}
+
+		if (params.categorySlug !== undefined) {
+			this.props.categorySlug = params.categorySlug
+		}
+
+		if (params.statusSlug !== undefined) {
+			this.props.statusSlug = params.statusSlug
+		}
+	}
+
 	// Getters
 	get title() {
 		return this.props.title

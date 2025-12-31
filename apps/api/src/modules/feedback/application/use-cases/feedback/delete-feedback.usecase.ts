@@ -5,26 +5,22 @@ import {
 	FEEDBACK_REPOSITORY,
 	IFeedbackRepository,
 } from '../../../domain/repositories/feedback.repository.interface'
-import { Feedback } from '../../../domain/entities/feedback.entity'
+
 import {
 	IPermissionService,
 	PERMISSION_SERVICE,
 } from 'src/modules/iam/application/ports/permission.service.interface'
 import { Action } from 'src/modules/iam/infrastructure/types/permission.types'
 
-export interface CreateFeedbackCommand {
+interface DeleteFeedbackCommand {
+	feedbackId: number
 	currentUser: User
-	params: {
-		title: string
-		description: string
-		categorySlug: string
-	}
 }
 
 @Injectable()
-export class CreateFeedbackUseCase implements IUseCase<
-	CreateFeedbackCommand,
-	Feedback
+export class DeleteFeedbackUseCase implements IUseCase<
+	DeleteFeedbackCommand,
+	void
 > {
 	constructor(
 		@Inject(FEEDBACK_REPOSITORY)
@@ -34,22 +30,17 @@ export class CreateFeedbackUseCase implements IUseCase<
 		private readonly permissionService: IPermissionService,
 	) {}
 
-	async execute(command: CreateFeedbackCommand): Promise<Feedback> {
-		this.permissionService.ensureCan(
-			command.currentUser,
-			Action.Create,
-			'Feedback',
+	async execute(command: DeleteFeedbackCommand) {
+		const feedbackToDelete = await this.feedbackRepository.findByIdOrThrow(
+			command.feedbackId,
 		)
 
-		const newFeedback = Feedback.create({
-			title: command.params.title,
-			description: command.params.description,
-			categorySlug: command.params.categorySlug,
-			authorId: command.currentUser.id,
-		})
+		this.permissionService.ensureCan(
+			command.currentUser,
+			Action.Delete,
+			feedbackToDelete,
+		)
 
-		const savedFeedback = await this.feedbackRepository.create(newFeedback)
-
-		return savedFeedback
+		await this.feedbackRepository.delete(feedbackToDelete)
 	}
 }
