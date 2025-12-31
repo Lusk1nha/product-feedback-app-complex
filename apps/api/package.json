@@ -29,6 +29,7 @@
 	},
 	"dependencies": {
 		"@casl/ability": "^6.7.5",
+		"@nestjs/axios": "^4.0.1",
 		"@nestjs/cache-manager": "^3.1.0",
 		"@nestjs/common": "^11.0.1",
 		"@nestjs/config": "^4.0.2",
@@ -37,6 +38,7 @@
 		"@nestjs/passport": "^11.0.5",
 		"@nestjs/platform-express": "^11.0.1",
 		"@nestjs/swagger": "^11.2.3",
+		"@nestjs/terminus": "^11.0.0",
 		"@nestjs/throttler": "^6.5.0",
 		"@scalar/nestjs-api-reference": "^1.0.13",
 		"bcrypt": "^6.0.0",

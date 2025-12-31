@@ -3,7 +3,12 @@ import * as compression from 'compression'
 
 import helmet from 'helmet'
 
-import { INestApplication, ValidationPipe } from '@nestjs/common'
+import {
+	ClassSerializerInterceptor,
+	INestApplication,
+	ValidationPipe,
+	VersioningType,
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Env, Environment } from '../environment/env.schema'
 import { DomainExceptionFilter } from './filters/domain-exception.filter'
@@ -54,6 +59,16 @@ export function configurePerformance(app: INestApplication) {
 }
 
 /**
+ * Configurações de Versionamento
+ */
+export function configureVersioning(app: INestApplication) {
+	app.enableVersioning({
+		type: VersioningType.URI,
+		defaultVersion: '1',
+	})
+}
+
+/**
  * Configurações de Pipes Globais e Filtros de Exceção
  */
 export function configurePipesAndFilters(app: INestApplication) {
@@ -62,6 +77,7 @@ export function configurePipesAndFilters(app: INestApplication) {
 			whitelist: true,
 			forbidNonWhitelisted: true,
 			transform: true,
+			transformOptions: { enableImplicitConversion: true },
 		}),
 	)
 
@@ -74,7 +90,13 @@ export function configurePipesAndFilters(app: INestApplication) {
 
 export function configureResponseDecorators(app: INestApplication) {
 	const reflector = app.get(Reflector)
-	app.useGlobalInterceptors(new TransformInterceptor(reflector))
+	app.useGlobalInterceptors(
+		new TransformInterceptor(reflector),
+
+		new ClassSerializerInterceptor(reflector, {
+			excludeExtraneousValues: false, // Se true, só retorna o que tiver @Expose()
+		}),
+	)
 }
 
 /**

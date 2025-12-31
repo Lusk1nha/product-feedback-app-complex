@@ -9,6 +9,7 @@ import {
 	configurePipesAndFilters,
 	configureResponseDecorators,
 	configureSecurity,
+	configureVersioning,
 } from './shared/infrastructure/http/app.setup'
 
 import { Logger } from 'nestjs-pino'
@@ -27,11 +28,13 @@ async function bootstrap() {
 	configurePipesAndFilters(app)
 	configureResponseDecorators(app)
 	configurePerformance(app)
+	configureVersioning(app)
 
 	configureDocumentation(app, configService)
 
 	const frontendUrl = configureCors(app, configService)
 
+	// 📝 Configuração de desligamento
 	app.enableShutdownHooks()
 
 	const port = configService.get('PORT', { infer: true })

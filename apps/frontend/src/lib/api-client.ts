@@ -141,6 +141,14 @@ api.interceptors.response.use(
 			await refreshAccessToken()
 			return api(originalRequest)
 		} catch (refreshError) {
+			if (refreshError instanceof AxiosError) {
+				if (refreshError.response?.status === 401) {
+					storage.clearToken()
+					toast.error('Your session has expired. Please log in again.')
+					return Promise.reject(transformError(refreshError))
+				}
+			}
+
 			// Se o refresh falhar, também transformamos esse erro
 			return Promise.reject(transformError(refreshError as AxiosError))
 		}

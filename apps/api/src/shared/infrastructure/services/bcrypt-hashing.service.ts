@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt'
 import * as crypto from 'crypto' // Módulo nativo do Node.js
 import { Injectable } from '@nestjs/common'
-import { HashingService } from 'src/shared/application/services/hash.service'
+import { HashingService } from '@/shared/application/services/hash.service'
 
 @Injectable()
 export class BcryptHashingService implements HashingService {

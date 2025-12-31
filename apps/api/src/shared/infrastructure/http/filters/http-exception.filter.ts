@@ -20,6 +20,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
 		// O Nest retorna o corpo do erro (message, error, statusCode) aqui
 		const exceptionResponse = exception.getResponse()
 
+		// --- 🔍 NOVO: DETECÇÃO DE HEALTH CHECK ---
+		// O pacote @nestjs/terminus lança um erro com um formato específico (status, error, details).
+		// Se detectarmos esse formato, retornamos direto para facilitar o debug da infraestrutura.
+		if (
+			typeof exceptionResponse === 'object' &&
+			exceptionResponse !== null &&
+			'status' in exceptionResponse &&
+			'error' in exceptionResponse &&
+			'details' in exceptionResponse
+		) {
+			this.logger.warn(`Health Check Failed: Service Unavailable`)
+			return response.status(status).json(exceptionResponse)
+		}
+		// -----------------------------------------
+
 		let errorCode = 'HTTP_ERROR'
 		let message = exception.message
 
@@ -31,18 +46,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
 		) {
 			const rawMessage = (exceptionResponse as any).message
 
-			// O class-validator retorna um array de strings, ex: ["email must be an email"]
-			// Vamos juntar tudo ou pegar o primeiro para ficar limpo no frontend
+			// O class-validator retorna um array de strings
 			if (Array.isArray(rawMessage)) {
 				errorCode = 'VALIDATION_ERROR'
-				message = rawMessage.join('; ') // Ex: "email inválido; senha curta"
+				message = rawMessage.join('; ')
 			} else {
 				message = rawMessage
 			}
 
-			// Se tiver o campo 'error' no body (ex: "Bad Request"), usamos como código
+			// Se tiver o campo 'error' no body
 			if ((exceptionResponse as any).error) {
-				// Se já definimos VALIDATION_ERROR, mantemos, senão pegamos do Nest (ex: Not Found)
 				errorCode =
 					errorCode === 'VALIDATION_ERROR'
 						? 'VALIDATION_ERROR'

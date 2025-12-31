@@ -13,6 +13,9 @@ import {
 	Env,
 } from './shared/infrastructure/environment/env.schema'
 import { FeedbackModule } from './modules/feedback/feedback.module'
+import { HealthModule } from './shared/infrastructure/health/health.module'
+
+import { randomUUID } from 'crypto' // 👈 Importe nativo do Node.js
 
 @Module({
 	imports: [
@@ -50,6 +53,17 @@ import { FeedbackModule } from './modules/feedback/feedback.module'
 
 				return {
 					pinoHttp: {
+						// 👇 AQUI COMEÇA A MÁGICA DO TRACING
+						genReqId: (req, res) => {
+							const existingID = req.id ?? req.headers['x-request-id']
+							if (existingID) return existingID
+
+							const id = randomUUID()
+							res.setHeader('X-Request-Id', id) // Devolve no header para o Frontend saber
+							return id
+						},
+						// 👆 FIM DA MÁGICA
+
 						customProps: (req, res) => ({
 							context: 'HTTP',
 						}),
@@ -59,7 +73,8 @@ import { FeedbackModule } from './modules/feedback/feedback.module'
 									options: {
 										singleLine: true,
 										colorize: true,
-										translateTime: 'SYS:standard', // Formato de hora legível
+										translateTime: 'SYS:standard',
+										ignore: 'pid,hostname', // Deixa o log mais limpo em dev
 									},
 								}
 							: undefined,
@@ -71,6 +86,7 @@ import { FeedbackModule } from './modules/feedback/feedback.module'
 							],
 							remove: true,
 						},
+						// Em produção 'info' é bom, mas 'warn' economiza mais disco se tiver muito tráfego
 						level: isProduction ? 'info' : 'debug',
 					},
 				}
@@ -80,6 +96,8 @@ import { FeedbackModule } from './modules/feedback/feedback.module'
 		// 4. Módulos de Domínio e Infraestrutura
 		DatabaseModule,
 		SharedModule,
+		HealthModule,
+
 		IamModule,
 		FeedbackModule,
 	],
