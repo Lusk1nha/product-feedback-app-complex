@@ -1,7 +1,8 @@
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'motion/react'
 import { useEffect } from 'react'
-import { FeedbackCategorySearchSelector } from '../common/feedback-category-search-selector'
+import { FeedbackCategorySearchSelector } from '../feedback/feedback-category-search-selector'
+import { RoadmapCard } from '../roadmap/roadmap-card'
 
 interface MobileSidebarProps {
 	isOpen: boolean
@@ -56,6 +57,7 @@ export function MobileSidebar({
 					>
 						<div className="flex flex-col gap-4">
 							<FeedbackCategorySearchSelector />
+							<RoadmapCard />
 						</div>
 					</motion.aside>
 				</>

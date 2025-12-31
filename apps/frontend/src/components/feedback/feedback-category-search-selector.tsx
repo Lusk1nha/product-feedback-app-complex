@@ -3,13 +3,7 @@ import { useAppMetadata } from '@/modules/feedback/hooks/use-app-metadata'
 import { Skeleton } from '@/components/ui/skeleton' // Assumindo que você tem shadcn
 import { useNavigate, useSearch } from '@tanstack/react-router'
 
-interface FeedbackCategorySearchSelectorProps {
-	className?: string
-}
-
-export function FeedbackCategorySearchSelector({
-	className,
-}: FeedbackCategorySearchSelectorProps) {
+export function FeedbackCategorySearchSelector() {
 	const { data: metadata, isFetching } = useAppMetadata()
 	const navigate = useNavigate()
 
@@ -62,7 +56,6 @@ export function FeedbackCategorySearchSelector({
 										? 'bg-brand-blue text-white'
 										: 'bg-brand-light text-brand-blue hover:bg-[#CFD7FF]',
 
-									// Focus Accessibility
 									'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple focus-visible:ring-offset-2',
 								)}
 								aria-pressed={isActive}

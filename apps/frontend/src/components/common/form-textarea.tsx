@@ -1,16 +1,16 @@
 import React from 'react'
 import { type UseFormRegisterReturn } from 'react-hook-form'
-import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea' // Ajuste o caminho se necessário
 import { cn } from '@/lib/utils'
 
-interface FormFieldProps extends React.ComponentProps<'input'> {
+interface FormTextareaProps extends React.ComponentProps<'textarea'> {
 	label: string
 	registration: UseFormRegisterReturn
 	error?: string
 	description?: string
 }
 
-export function FormField({
+export function FormTextarea({
 	id,
 	label,
 	registration,
@@ -18,15 +18,15 @@ export function FormField({
 	className,
 	description,
 	...props
-}: FormFieldProps) {
+}: FormTextareaProps) {
 	// Garante um ID único se não for passado, para acessibilidade do label
-	const inputId = id || registration.name
+	const textareaId = id || registration.name
 
 	return (
 		<div className={cn('space-y-2', className)}>
 			<div className="flex justify-between items-center">
 				<label
-					htmlFor={inputId}
+					htmlFor={textareaId}
 					className="text-[13px] font-bold text-brand-dark tracking-[-0.18px] cursor-pointer"
 				>
 					{label}
@@ -49,10 +49,28 @@ export function FormField({
 				</p>
 			)}
 
-			<Input
-				id={inputId}
+			<Textarea
+				id={textareaId}
+				// 👇 Conecta o aria-invalid para ativar a borda vermelha definida no seu componente Textarea
 				aria-invalid={!!error}
-				className="h-[48px] rounded-[5px]"
+				// 👇 Conecta o React Hook Form (onChange, onBlur, ref)
+				className={cn(
+					// 2. Comportamento
+					'resize-none', // Opcional: Impede o usuário de quebrar o layout redimensionando
+
+					// 3. ESTILO DO FIGMA (O DNA Visual)
+					'min-h-[120px]', // Altura inicial do Figma
+					'rounded-[5px]',
+					'bg-[#F7F8FD] text-brand-dark',
+					'border-none',
+
+					// 4. Placeholder
+					'placeholder:text-brand-dark/50',
+
+					// 5. Estados Interativos (Focus e Erro)
+					'focus:ring-1 focus:ring-brand-blue',
+					'aria-invalid:ring-1 aria-invalid:ring-destructive',
+				)}
 				{...registration}
 				{...props}
 			/>

@@ -1,10 +1,11 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
-import { GetAppMetadataUseCase } from '../../../application/use-cases/get-app-metadata.usecase'
+import { GetAppMetadataUseCase } from '../../../application/use-cases/metadata/get-app-metadata.usecase'
 import {
 	AppMetadataResponse,
 	MetadataPresenter,
 } from '../presenters/metadata.presenter'
+import { Auth } from 'src/shared/infrastructure/http/decorators/auth.decorator'
 
 @ApiTags('Config')
 @Controller('config')
@@ -19,7 +20,7 @@ export class MetadataController {
 		description: 'App configuration data',
 		type: AppMetadataResponse,
 	})
-	// @Auth()
+	@Auth()
 	@Get('metadata')
 	@HttpCode(HttpStatus.OK)
 	async getMetadata() {

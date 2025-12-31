@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { AppMetadataOutput } from 'src/modules/feedback/application/use-cases/get-app-metadata.usecase'
+import { AppMetadataOutput } from 'src/modules/feedback/application/use-cases/metadata/get-app-metadata.usecase'
 
 export class CategoryResponse {
 	@ApiProperty({ example: 'ui' })

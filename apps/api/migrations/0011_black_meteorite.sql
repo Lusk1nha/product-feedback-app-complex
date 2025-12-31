@@ -1,0 +1,1 @@
+ALTER TABLE "feedbacks" ADD COLUMN "enabled" boolean DEFAULT true NOT NULL;

@@ -4,10 +4,15 @@ import {
 	timestamp,
 	boolean,
 	integer,
+	serial,
+	text,
+	primaryKey,
 } from 'drizzle-orm/pg-core'
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import { timestampConfig } from 'src/shared/infrastructure/database/schema.utils'
+import { users } from 'src/shared/infrastructure/database/schema'
 
+// 1. Tabela de Categorias (Lookup Table)
 export const feedbackCategories = pgTable('feedback_categories', {
 	slug: varchar('slug', { length: 50 }).primaryKey(),
 	label: varchar('label', { length: 50 }).notNull(),
@@ -43,3 +48,89 @@ export const feedbackStatuses = pgTable('feedback_statuses', {
 		.notNull()
 		.$onUpdate(() => sql`CURRENT_TIMESTAMP`),
 })
+
+
+// 3. Tabela de Feedbacks (Table)
+export const feedbacks = pgTable('feedbacks', {
+	id: serial('id').primaryKey(),
+
+	title: varchar('title', { length: 255 }).notNull(),
+	description: text('description').notNull(),
+
+	authorId: integer('author_id')
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' }),
+
+	categorySlug: varchar('category_slug', { length: 50 })
+		.notNull()
+		.references(() => feedbackCategories.slug),
+
+	statusSlug: varchar('status_slug', { length: 50 })
+		.notNull()
+		.references(() => feedbackStatuses.slug),
+
+	// DESNORMALIZAÇÃO:
+	// Mantemos o contador aqui. O Elixir vai ler esse campo para fazer o broadcast inicial.
+	// O NestJS será responsável por incrementar/decrementar isso atomicamente.
+	upvotesCount: integer('upvotes_count').default(0).notNull(),
+
+	enabled: boolean('enabled').default(true).notNull(),
+
+	createdAt: timestamp('created_at', timestampConfig).defaultNow().notNull(),
+	updatedAt: timestamp('updated_at', timestampConfig)
+		.defaultNow()
+		.notNull()
+		.$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+})
+
+// 5. Tabela de Upvotes (Table)
+export const upvotes = pgTable(
+	'upvotes',
+	{
+		feedbackId: integer('feedback_id')
+			.notNull()
+			.references(() => feedbacks.id, { onDelete: 'cascade' }),
+
+		userId: integer('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+
+		createdAt: timestamp('created_at', timestampConfig).defaultNow().notNull(),
+	},
+	(table) => [
+		{
+			pk: primaryKey({
+				columns: [table.feedbackId, table.userId],
+			}),
+		},
+	],
+)
+
+// --- Relations ---
+export const feedbacksRelations = relations(feedbacks, ({ one, many }) => ({
+	author: one(users, {
+		fields: [feedbacks.authorId],
+		references: [users.id],
+	}),
+	category: one(feedbackCategories, {
+		fields: [feedbacks.categorySlug],
+		references: [feedbackCategories.slug],
+	}),
+	status: one(feedbackStatuses, {
+		fields: [feedbacks.statusSlug],
+		references: [feedbackStatuses.slug],
+	}),
+	// Relação para saber quem votou neste feedback
+	upvotes: many(upvotes),
+}))
+
+export const upvotesRelations = relations(upvotes, ({ one }) => ({
+	feedback: one(feedbacks, {
+		fields: [upvotes.feedbackId],
+		references: [feedbacks.id],
+	}),
+	user: one(users, {
+		fields: [upvotes.userId],
+		references: [users.id],
+	}),
+}))

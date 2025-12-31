@@ -3,12 +3,11 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 export const Route = createFileRoute('/_authenticated/')({
 	component: RouteComponent,
 
-	beforeLoad({ context }) {
-		if (!context.auth.isAuthenticated || context.auth.isLoading) {
-			throw redirect({ to: '/login' })
-		}
-
-		redirect({ to: '/dashboard' })
+	beforeLoad: () => {
+		throw redirect({
+			to: '/dashboard',
+			search: { category: 'all', sort: 'most_upvotes' }, // Defaults batendo com seu Zod schema
+		})
 	},
 })
 

@@ -3,9 +3,9 @@ import { IUseCase } from 'src/shared/application/interfaces/use-case.interface'
 import {
 	IMetadataRepository,
 	METADATA_REPOSITORY,
-} from '../../domain/repositories/metadata.repository.interface'
-import { FeedbackCategory } from '../../domain/value-objects/feedback-category.vo'
-import { FeedbackStatus } from '../../domain/value-objects/feedback-status.vo'
+} from '../../../domain/repositories/metadata.repository.interface'
+import { FeedbackCategory } from '../../../domain/value-objects/feedback-category.vo'
+import { FeedbackStatus } from '../../../domain/value-objects/feedback-status.vo'
 
 export interface AppMetadataOutput {
 	categories: FeedbackCategory[]

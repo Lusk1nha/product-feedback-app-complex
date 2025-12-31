@@ -1,8 +1,8 @@
 import { type FeedbackValue } from '@/modules/feedback/types/feedback.sort'
 import { BulbSvg } from '../common/icons/bulb-svg'
-import { SelectFeedbackSort } from '../feedbacks/select-feedback-sort'
+import { SelectFeedbackSort } from '../feedback/select-feedback-sort'
 import { Button } from '../ui/button'
-import { useSearch } from '@tanstack/react-router'
+import { Link, useSearch } from '@tanstack/react-router'
 import { useNavigate } from '@tanstack/react-router'
 
 interface SearchFeedbacksBarProps {
@@ -36,12 +36,14 @@ export function SearchFeedbacksBar({
 				/>
 			</div>
 
-			<Button
-				type="button"
-				className="text-h4 font-bold h-10 bg-brand-purple hover:bg-brand-purple/80 text-white sm:h-11"
-			>
-				+ Add Feedback
-			</Button>
+			<Link to="/feedbacks/new">
+				<Button
+					type="button"
+					className="text-h4 font-bold h-10 bg-brand-purple hover:bg-brand-purple/80 text-white sm:h-11"
+				>
+					+ Add Feedback
+				</Button>
+			</Link>
 		</div>
 	)
 }

@@ -18,8 +18,12 @@ export class AppPolicy {
 		// 2. Regras de USUÁRIO COMUM
 		builder.can(Action.Read, 'all')
 
+		// Regra: Pode ler e criar feedbacks
+		builder.can(Action.Read, Feedback)
+		builder.can(Action.Create, Feedback)
 		// Regra: Pode gerenciar seus próprios feedbacks
-		builder.can(Action.Update, Feedback, { authorId: user.id })
+		builder.can(Action.Update, Feedback, { authorId: user.id,  })
+		// Regra: Pode deletar seus próprios feedbacks
 		builder.can(Action.Delete, Feedback, { authorId: user.id })
 
 		// Regra: Pode atualizar seu próprio perfil
