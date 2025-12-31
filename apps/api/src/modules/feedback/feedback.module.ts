@@ -14,9 +14,11 @@ import { CreateFeedbackUseCase } from './application/use-cases/feedback/create-f
 import { DeleteFeedbackUseCase } from './application/use-cases/feedback/delete-feedback.usecase'
 import { GetFeedbackByIdUseCase } from './application/use-cases/feedback/get-feedback-by-id.usecase'
 import { UpdateFeedbackUseCase } from './application/use-cases/feedback/update-feedback.usecase'
+import { ListFeedbacksUseCase } from './application/use-cases/feedback/list-feedback.usecase'
+import { CacheModule } from '@nestjs/cache-manager'
 
 @Module({
-	imports: [],
+	imports: [CacheModule.register({ ttl: 60000 })],
 	controllers: [FeedbackController, MetadataController],
 	providers: [
 		// 1. Repositories (Binding Interface -> Implementation)
@@ -35,6 +37,8 @@ import { UpdateFeedbackUseCase } from './application/use-cases/feedback/update-f
 		// 2. Use Cases
 		GetAppMetadataUseCase,
 		GetRoadmapStatsUseCase,
+
+		ListFeedbacksUseCase,
 		GetFeedbackByIdUseCase,
 		CreateFeedbackUseCase,
 		UpdateFeedbackUseCase,

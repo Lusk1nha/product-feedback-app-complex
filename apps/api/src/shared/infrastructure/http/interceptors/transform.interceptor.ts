@@ -16,6 +16,7 @@ export interface Response<T> {
 	statusCode: number
 	message?: string
 	data: T
+	meta?: any // 👈 Adicionamos o campo opcional meta
 	timestamp: string
 	path: string
 }
@@ -35,7 +36,6 @@ export class TransformInterceptor<T> implements NestInterceptor<
 		const response = ctx.getResponse()
 		const request = ctx.getRequest()
 
-		// 1. Checa se a rota deve ser IGNORADA (ex: downloads, health check)
 		const ignoreTransform = this.reflector.getAllAndOverride<boolean>(
 			IGNORE_TRANSFORM_KEY,
 			[context.getHandler(), context.getClass()],
@@ -45,7 +45,6 @@ export class TransformInterceptor<T> implements NestInterceptor<
 			return next.handle()
 		}
 
-		// 2. Busca mensagem customizada (ex: "Logged in successfully")
 		const message = this.reflector.getAllAndOverride<string>(
 			RESPONSE_MESSAGE_KEY,
 			[context.getHandler(), context.getClass()],
@@ -53,14 +52,31 @@ export class TransformInterceptor<T> implements NestInterceptor<
 
 		return next.handle().pipe(
 			map((data) => {
-				// Se o controller retornar apenas { message: '...' }, usamos isso
-				// Isso ajuda se você não usar o decorator, mas retornar objeto com message
 				const finalMessage =
 					message || (data && data.message ? data.message : null)
 
-				// Se o data for exatamente o objeto { message: ... }, podemos limpar o data
-				// para não duplicar, ou manter. Aqui mantemos a estrutura padrão.
+				// --- LÓGICA DE PAGINAÇÃO INTELIGENTE ---
+				// Verifica se o retorno tem o formato { data: [], meta: {} }
+				const isPaginated =
+					data &&
+					typeof data === 'object' &&
+					'data' in data &&
+					'meta' in data &&
+					Array.isArray(data.data)
 
+				// Se for paginado, extraímos o meta para fora do 'data' principal
+				if (isPaginated) {
+					return {
+						statusCode: response.statusCode,
+						message: finalMessage,
+						data: data.data, // 👈 A lista vai direto aqui
+						meta: data.meta, // 👈 O meta fica no nível raiz
+						timestamp: new Date().toISOString(),
+						path: request.url,
+					}
+				}
+
+				// Fluxo padrão para respostas normais (ex: create, getById)
 				return {
 					statusCode: response.statusCode,
 					message: finalMessage,

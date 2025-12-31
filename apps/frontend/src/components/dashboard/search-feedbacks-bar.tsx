@@ -1,6 +1,6 @@
 import { type FeedbackValue } from '@/modules/feedback/types/feedback.sort'
 import { BulbSvg } from '../common/icons/bulb-svg'
-import { SelectFeedbackSort } from '../feedback/select-feedback-sort'
+import { SelectFeedbackSort } from '../../modules/feedback/components/select-feedback-sort'
 import { Button } from '../ui/button'
 import { Link, useSearch } from '@tanstack/react-router'
 import { useNavigate } from '@tanstack/react-router'
@@ -27,7 +27,7 @@ export function SearchFeedbacksBar({
 	}
 
 	return (
-		<div className="bg-brand-dark w-full h-14 px-6 flex items-center justify-between sm:rounded-lg sm:h-18">
+		<div className="bg-brand-dark w-full h-14 px-6 flex items-center justify-between md:rounded-lg md:h-18">
 			<div className="flex items-center gap-x-9.5">
 				<SuggestionsCount count={sugestionsFoundedLength} />
 				<SelectFeedbackSort
@@ -39,7 +39,7 @@ export function SearchFeedbacksBar({
 			<Link to="/feedbacks/new">
 				<Button
 					type="button"
-					className="text-h4 font-bold h-10 bg-brand-purple hover:bg-brand-purple/80 text-white sm:h-11"
+					className="text-h4 font-bold h-10 bg-brand-purple hover:bg-brand-purple/80 text-white md:h-11"
 				>
 					+ Add Feedback
 				</Button>
@@ -50,7 +50,7 @@ export function SearchFeedbacksBar({
 
 function SuggestionsCount({ count = 0 }: Readonly<{ count: number }>) {
 	return (
-		<div className="hidden items-center gap-x-4 sm:flex text-white">
+		<div className="hidden items-center gap-x-4 md:flex text-white">
 			<BulbSvg />
 			<p className="text-h3 font-medium">{`${count} Suggestions`}</p>
 		</div>

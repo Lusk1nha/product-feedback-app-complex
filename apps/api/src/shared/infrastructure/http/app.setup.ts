@@ -1,4 +1,6 @@
 import * as cookieParser from 'cookie-parser'
+import * as compression from 'compression'
+
 import helmet from 'helmet'
 
 import { INestApplication, ValidationPipe } from '@nestjs/common'
@@ -42,6 +44,13 @@ export function configureSecurity(app: INestApplication) {
 			},
 		}),
 	)
+}
+
+/**
+ * Configurações de Performance (Compressão)
+ */
+export function configurePerformance(app: INestApplication) {
+	app.use(compression())
 }
 
 /**

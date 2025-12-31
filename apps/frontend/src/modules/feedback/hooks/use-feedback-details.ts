@@ -7,5 +7,7 @@ export function useFeedback(id: number) {
 		queryKey: ['feedback', id],
 		queryFn: () => FeedbackApi.getFeedbackById(id),
 		enabled: !!id,
+
+		refetchOnWindowFocus: false,
 	})
 }

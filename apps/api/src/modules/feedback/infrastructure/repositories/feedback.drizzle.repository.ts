@@ -2,12 +2,17 @@ import * as schema from 'src/shared/infrastructure/database/schema'
 
 import { Inject, Injectable } from '@nestjs/common'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import { sql, eq } from 'drizzle-orm'
+import { sql, eq, asc, desc, and, SQL } from 'drizzle-orm'
 import { DRIZZLE_PROVIDER } from 'src/shared/infrastructure/database/database.module'
-import { IFeedbackRepository } from '../../domain/repositories/feedback.repository.interface'
+import {
+	FindFeedbacksParams,
+	IFeedbackRepository,
+} from '../../domain/repositories/feedback.repository.interface'
 import { Feedback } from '../../domain/entities/feedback.entity'
 import { FeedbackMapper } from '../database/mappers/feedback.mapper'
 import { FeedbackNotFoundError } from '../../domain/errors/feedback-not-found.error'
+import { FeedbackSort } from '../../domain/enums/feedback-sort.enum'
+import { PaginatedResult } from 'src/shared/application/interfaces/paginated-result.interface'
 
 @Injectable()
 export class FeedbackDrizzleRepository implements IFeedbackRepository {
@@ -60,6 +65,77 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 		const result = await this.findById(id)
 		if (!result) throw new FeedbackNotFoundError()
 		return result
+	}
+
+	async findAll(
+		params: FindFeedbacksParams,
+	): Promise<PaginatedResult<Feedback>> {
+		const { categorySlug, sort, page, perPage } = params
+
+		// Filtros base
+		const filters: SQL[] = []
+		if (categorySlug && categorySlug !== 'all') {
+			filters.push(eq(schema.feedbacks.categorySlug, categorySlug))
+		}
+
+		// Ordenação (Reutilizando a lógica que fizemos antes)
+		let orderByClause = desc(schema.feedbacks.upvotesCount)
+
+		// 3. Aplica Ordenação baseada no Enum
+		switch (sort) {
+			case FeedbackSort.LEAST_UPVOTES:
+				orderByClause = asc(schema.feedbacks.upvotesCount)
+				break
+
+			case FeedbackSort.MOST_COMMENTS:
+				orderByClause = desc(schema.feedbacks.upvotesCount)
+				break
+
+			case FeedbackSort.LEAST_COMMENTS:
+				orderByClause = asc(schema.feedbacks.upvotesCount)
+				break
+
+			case FeedbackSort.MOST_UPVOTES:
+			default:
+				orderByClause = desc(schema.feedbacks.upvotesCount)
+				break
+		}
+
+		// Cálculo do Offset
+		const offset = (page - 1) * perPage
+
+		// 🚀 Executa as duas queries em paralelo
+		const [dataRaw, countResult] = await Promise.all([
+			// 1. Busca os dados paginados
+			this.db
+				.select()
+				.from(schema.feedbacks)
+				.where(and(...filters))
+				.orderBy(orderByClause)
+				.limit(perPage)
+				.offset(offset),
+
+			// 2. Busca o total (Count)
+			this.db
+				.select({
+					count: sql<number>`cast(count(${schema.feedbacks.id}) as int)`,
+				})
+				.from(schema.feedbacks)
+				.where(and(...filters)),
+		])
+
+		const total = countResult[0].count
+		const lastPage = Math.ceil(total / perPage)
+
+		return {
+			data: dataRaw.map(FeedbackMapper.toDomain),
+			meta: {
+				page,
+				perPage,
+				total,
+				lastPage,
+			},
+		}
 	}
 
 	async countByStatus(): Promise<Record<string, number>> {

@@ -9,6 +9,8 @@ import {
 	ParseIntPipe,
 	Post,
 	Put,
+	Query,
+	UseInterceptors,
 } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { GetRoadmapStatsUseCase } from '../../../application/use-cases/feedback/get-roadmap-stats.usecase'
@@ -27,6 +29,10 @@ import { UpdateFeedbackUseCase } from 'src/modules/feedback/application/use-case
 import { DeleteFeedbackUseCase } from 'src/modules/feedback/application/use-cases/feedback/delete-feedback.usecase'
 import { ResponseMessage } from 'src/shared/infrastructure/http/decorators/response.decorator'
 import { UpdateFeedbackDto } from '../dtos/feedback/update-feedback.dto'
+import { ListFeedbacksDto } from '../dtos/feedback/list-feedbacks.dto'
+import { ListFeedbacksUseCase } from 'src/modules/feedback/application/use-cases/feedback/list-feedback.usecase'
+import { toCollection } from 'src/shared/interface/http/presenters/collection.presenter'
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager'
 
 @ApiTags('Feedbacks')
 @Controller('feedbacks')
@@ -36,6 +42,8 @@ export class FeedbackController {
 		private readonly getRoadmapStatsUseCase: GetRoadmapStatsUseCase,
 
 		private readonly getFeedbackByIdUseCase: GetFeedbackByIdUseCase,
+		private readonly listFeedbacksUseCase: ListFeedbacksUseCase,
+
 		private readonly createFeedbackUseCase: CreateFeedbackUseCase,
 		private readonly updateFeedbackUseCase: UpdateFeedbackUseCase,
 		private readonly deleteFeedbackUseCase: DeleteFeedbackUseCase,
@@ -47,6 +55,8 @@ export class FeedbackController {
 		description: 'Returns a map of status slugs to their counts',
 	})
 	@Get('stats')
+	@UseInterceptors(CacheInterceptor)
+	@CacheTTL(60000)
 	@HttpCode(HttpStatus.OK)
 	async getStats() {
 		const stats = await this.getRoadmapStatsUseCase.execute()
@@ -135,5 +145,29 @@ export class FeedbackController {
 		@CurrentUser() currentUser: User,
 	) {
 		await this.deleteFeedbackUseCase.execute({ feedbackId: id, currentUser })
+	}
+
+	@ApiOperation({
+		summary: 'List feedbacks with filters, sorting and pagination',
+	})
+	@ApiResponse({
+		status: HttpStatus.OK,
+		description: 'List of feedbacks',
+		type: [FeedbackResponse],
+	})
+	@Get()
+	async findAll(
+		@Query() query: ListFeedbacksDto,
+		@CurrentUser() currentUser: User,
+	) {
+		const result = await this.listFeedbacksUseCase.execute({
+			currentUser,
+			category: query.category,
+			sort: query.sort,
+			page: query.page, // Vem do DTO herdado
+			perPage: query.perPage, // Vem do DTO herdado
+		})
+
+		return toCollection(result, FeedbackPresenter.toHTTP)
 	}
 }

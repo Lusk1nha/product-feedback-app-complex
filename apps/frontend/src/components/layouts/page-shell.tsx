@@ -35,7 +35,7 @@ export function PageShell({ children, className, ...props }: PageShellProps) {
 			animate="visible"
 			variants={pageContainerVariants}
 			className={cn(
-				'flex flex-col relative min-h-screen bg-background sm:py-14 sm:px-10 sm:gap-10 lg:flex-row lg:py-24 lg:px-18',
+				'flex flex-col relative min-h-screen bg-background',
 				className,
 			)}
 			{...props}

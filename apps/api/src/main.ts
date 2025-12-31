@@ -5,6 +5,7 @@ import { Env } from './shared/infrastructure/environment/env.schema'
 import {
 	configureCors,
 	configureDocumentation,
+	configurePerformance,
 	configurePipesAndFilters,
 	configureResponseDecorators,
 	configureSecurity,
@@ -25,6 +26,7 @@ async function bootstrap() {
 	configureSecurity(app)
 	configurePipesAndFilters(app)
 	configureResponseDecorators(app)
+	configurePerformance(app)
 
 	configureDocumentation(app, configService)
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { SortFeedbackPopover } from './popovers/sort-feedback-popover'
+import { SortFeedbackPopover } from './sort-feedback-popover'
 import {
 	getFeedbackSortLabel,
 	type FeedbackValue,

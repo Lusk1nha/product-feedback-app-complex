@@ -19,7 +19,7 @@ export function MobileTopBar({
 			{/* Nota: h-18 é 4.5rem (72px). 
          Se o Tailwind não reconhecer h-18 nativamente, use h-[72px] ou adicione no theme.
       */}
-			<div className="h-18 flex items-center justify-between px-6 sm:hidden">
+			<div className="h-18 flex items-center justify-between px-6">
 				<div className="container">
 					<h1 className="text-primary-foreground text-body-2 font-bold">
 						Frontend Mentor

@@ -7,18 +7,19 @@ import { MobileTopBar } from '@/components/mobile/mobile-top-bar'
 import { MobileSidebar } from '@/components/mobile/mobile-sidebar'
 import { SearchFeedbacksBar } from '@/components/dashboard/search-feedbacks-bar'
 import { DashboardLogo } from '@/components/dashboard/dashboard-logo'
-import { FeedbackCategorySearchSelector } from '@/components/feedback/feedback-category-search-selector'
+import { FeedbackCategorySearchSelector } from '@/modules/feedback/components/feedback-category-search-selector'
 import { FeedbackSort } from '@/modules/feedback/types/feedback.sort'
 import { RoadmapCard } from '@/components/roadmap/roadmap-card'
 import { PageShell } from '@/components/layouts/page-shell'
 
-const feedbackSearchSchema = z.object({
+const feedbackSearchPageValidateSearchSchema = z.object({
 	sort: z.enum(FeedbackSort).optional().default(FeedbackSort.MostUpvotes),
 	category: z.string().optional().default('all'),
 })
 
 export const Route = createFileRoute('/_authenticated/dashboard/')({
-	validateSearch: (search) => feedbackSearchSchema.parse(search),
+	validateSearch: (search) =>
+		feedbackSearchPageValidateSearchSchema.parse(search),
 	component: DashboardPage,
 
 	errorComponent: ({ reset }) => {
@@ -46,9 +47,9 @@ export function DashboardPage() {
 	const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
 	return (
-		<PageShell>
+		<PageShell className="md:pt-14 md:pb-14 md:px-10 md:gap-y-10 md:gap-x-7.5 md:items-center lg:flex-row lg:items-start lg:justify-center">
 			{/* --- Mobile Header & Sidebar --- */}
-			<div className="sm:hidden">
+			<div className="w-full md:hidden">
 				<MobileTopBar
 					isSidebarOpen={isMobileSidebarOpen}
 					onToggleSidebar={() => setIsMobileSidebarOpen((prev) => !prev)}
@@ -61,7 +62,7 @@ export function DashboardPage() {
 			</div>
 
 			{/* --- Desktop/Tablet Sidebar Column --- */}
-			<motion.aside variants={itemVariants} className="hidden sm:block">
+			<motion.aside variants={itemVariants} className="hidden md:block">
 				<div className="grid grid-cols-3 gap-x-2.5 lg:flex lg:flex-col lg:gap-y-6 lg:w-[255px]">
 					<DashboardLogo />
 					<FeedbackCategorySearchSelector />
@@ -72,11 +73,9 @@ export function DashboardPage() {
 			{/* --- Main Content --- */}
 			<motion.main
 				variants={itemVariants}
-				className="w-full max-w-[825px] flex flex-col gap-y-6"
+				className="w-full flex flex-col gap-y-6"
 			>
 				<SearchFeedbacksBar />
-
-				{/* Aqui virá a lista de feedbacks (Empty State ou Lista Real) */}
 			</motion.main>
 		</PageShell>
 	)

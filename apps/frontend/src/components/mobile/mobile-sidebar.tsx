@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'motion/react'
 import { useEffect } from 'react'
-import { FeedbackCategorySearchSelector } from '../feedback/feedback-category-search-selector'
+import { FeedbackCategorySearchSelector } from '../../modules/feedback/components/feedback-category-search-selector'
 import { RoadmapCard } from '../roadmap/roadmap-card'
 
 interface MobileSidebarProps {
@@ -15,7 +15,7 @@ export function MobileSidebar({
 }: Readonly<MobileSidebarProps>) {
 	useEffect(() => {
 		const handleResize = () => {
-			if (window.innerWidth >= 640 && isOpen) {
+			if (window.innerWidth >= 768 && isOpen) {
 				onClose()
 			}
 		}
@@ -38,7 +38,7 @@ export function MobileSidebar({
 						className={cn(
 							'fixed inset-0',
 							topBarHeightClass,
-							'z-40 bg-black/50 sm:hidden',
+							'z-40 bg-black/50',
 						)}
 						aria-hidden="true"
 					/>
@@ -52,7 +52,7 @@ export function MobileSidebar({
 						className={cn(
 							'fixed right-0 bottom-0',
 							topBarHeightClass,
-							'z-50 w-[72.5%] bg-background p-6 shadow-xl sm:hidden',
+							'z-50 w-[72.5%] bg-background p-6 shadow-xl',
 						)}
 					>
 						<div className="flex flex-col gap-4">

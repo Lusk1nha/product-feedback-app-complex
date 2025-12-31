@@ -7,6 +7,7 @@ import {
 	serial,
 	text,
 	primaryKey,
+	index,
 } from 'drizzle-orm/pg-core'
 import { relations, sql } from 'drizzle-orm'
 import { timestampConfig } from 'src/shared/infrastructure/database/schema.utils'
@@ -49,39 +50,56 @@ export const feedbackStatuses = pgTable('feedback_statuses', {
 		.$onUpdate(() => new Date()),
 })
 
-
 // 3. Tabela de Feedbacks (Table)
-export const feedbacks = pgTable('feedbacks', {
-	id: serial('id').primaryKey(),
+export const feedbacks = pgTable(
+	'feedbacks',
+	{
+		id: serial('id').primaryKey(),
 
-	title: varchar('title', { length: 255 }).notNull(),
-	description: text('description').notNull(),
+		title: varchar('title', { length: 255 }).notNull(),
+		description: text('description').notNull(),
 
-	authorId: integer('author_id')
-		.notNull()
-		.references(() => users.id, { onDelete: 'cascade' }),
+		authorId: integer('author_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
 
-	categorySlug: varchar('category_slug', { length: 50 })
-		.notNull()
-		.references(() => feedbackCategories.slug),
+		categorySlug: varchar('category_slug', { length: 50 })
+			.notNull()
+			.references(() => feedbackCategories.slug),
 
-	statusSlug: varchar('status_slug', { length: 50 })
-		.notNull()
-		.references(() => feedbackStatuses.slug),
+		statusSlug: varchar('status_slug', { length: 50 })
+			.notNull()
+			.references(() => feedbackStatuses.slug),
 
-	// DESNORMALIZAÇÃO:
-	// Mantemos o contador aqui. O Elixir vai ler esse campo para fazer o broadcast inicial.
-	// O NestJS será responsável por incrementar/decrementar isso atomicamente.
-	upvotesCount: integer('upvotes_count').default(0).notNull(),
+		// DESNORMALIZAÇÃO:
+		// Mantemos o contador aqui. O Elixir vai ler esse campo para fazer o broadcast inicial.
+		// O NestJS será responsável por incrementar/decrementar isso atomicamente.
+		upvotesCount: integer('upvotes_count').default(0).notNull(),
 
-	enabled: boolean('enabled').default(true).notNull(),
+		enabled: boolean('enabled').default(true).notNull(),
 
-	createdAt: timestamp('created_at', timestampConfig).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', timestampConfig)
-		.defaultNow()
-		.notNull()
-		.$onUpdate(() => new Date()),
-})
+		createdAt: timestamp('created_at', timestampConfig).defaultNow().notNull(),
+		updatedAt: timestamp('updated_at', timestampConfig)
+			.defaultNow()
+			.notNull()
+			.$onUpdate(() => new Date()),
+	},
+	(table) => {
+		return {
+			// 1. Índice para filtrar por categoria rapidamente
+			categoryIdx: index('feedback_category_idx').on(table.categorySlug),
+
+			// 2. Índice para ordenação (Upvotes é o mais usado)
+			upvotesIdx: index('feedback_upvotes_idx').on(table.upvotesCount),
+
+			// 3. Índice Composto (Opcional, mas muito rápido para "Filtrar Categoria + Ordenar Upvotes")
+			categoryUpvotesIdx: index('feedback_category_upvotes_idx').on(
+				table.categorySlug,
+				table.upvotesCount,
+			),
+		}
+	},
+)
 
 // 5. Tabela de Upvotes (Table)
 export const upvotes = pgTable(
