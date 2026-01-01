@@ -1,4 +1,6 @@
+import { paginationSchema } from '@/modules/shared/types/api.schemas'
 import z from 'zod'
+import { FeedbackSort } from './feedback.sort'
 
 export const feedbackCategorySchema = z.object({
 	slug: z.string(),
@@ -87,6 +89,15 @@ export const feedbackSchema = z.object({
 	createdAt: z.coerce.date(),
 	updatedAt: z.coerce.date(),
 })
+
+
+// 3. Schema do DTO de Listagem
+export const listFeedbacksSchema = paginationSchema.extend({
+	category: z.string().optional(),
+	sort: z.enum(FeedbackSort).optional(),
+})
+
+export type ListFeedbacksPayload = z.infer<typeof listFeedbacksSchema>
 
 export type FeedbackCategory = z.infer<typeof feedbackCategorySchema>
 export type FeedbackStatus = z.infer<typeof feedbackStatusSchema>

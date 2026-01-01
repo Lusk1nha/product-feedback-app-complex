@@ -1,17 +1,20 @@
 import { env } from '@/config/env'
 import { logger } from '@/lib/logger'
-import type { ApiError, ApiResponse } from '@/types/api.types'
-import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
+import type { ApiError, ApiResponse, PaginatedResult } from '@/types/api.types'
+import axios, {
+	AxiosError,
+	type AxiosRequestConfig,
+	type InternalAxiosRequestConfig,
+} from 'axios'
 import { AppError } from './app-error'
 import { storage } from './storage'
 import type { AuthResponse } from '@/modules/iam/types/auth.schemas'
 import { toast } from 'sonner'
 
 // --- Tipagem ---
-interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+interface CustomAxiosRequestConfig extends AxiosRequestConfig {
 	_retry?: boolean
 }
-
 // --- Instância do Axios ---
 // Instância principal (com interceptors)
 export const api = axios.create({
@@ -119,18 +122,16 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
 	(response) => response,
 	async (error: AxiosError) => {
-		const originalRequest = error.config as CustomAxiosRequestConfig
+		const originalRequest = error.config as InternalAxiosRequestConfig & {
+			_retry?: boolean
+		}
 
-		// LOG: Logamos o erro cru primeiro para debug
 		logApiError(error)
 
-		// 1. Se não for 401 ou já tentou retry...
 		if (error.response?.status !== 401 || originalRequest?._retry) {
-			// AQUI ESTÁ O TRUQUE: Rejeitamos com o erro transformado
 			return Promise.reject(transformError(error))
 		}
 
-		// 2. Auth Request check...
 		if (isAuthRequest(originalRequest.url)) {
 			return Promise.reject(transformError(error))
 		}
@@ -159,6 +160,25 @@ export const httpClient = {
 	get: async <T>(url: string, config?: CustomAxiosRequestConfig) => {
 		const response = await api.get<ApiResponse<T>>(url, config)
 		return response.data?.data
+	},
+
+	getPaginated: async <T>(
+		url: string,
+		config?: CustomAxiosRequestConfig,
+	): Promise<PaginatedResult<T>> => {
+		const response = await api.get<ApiResponse<T>>(url, config)
+
+		const meta = response.data?.meta || {
+			page: 1,
+			perPage: 10,
+			total: 0,
+			lastPage: 1,
+		}
+
+		return {
+			data: response.data?.data,
+			meta,
+		}
 	},
 
 	post: async <T>(

@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedFeedbacksNewIndexRouteImport } from './routes/_authenticated/feedbacks/new/index'
+import { Route as AuthenticatedFeedbacksFeedbackIdIndexRouteImport } from './routes/_authenticated/feedbacks/$feedbackId/index'
 import { Route as AuthenticatedFeedbacksFeedbackIdEditRouteImport } from './routes/_authenticated/feedbacks/$feedbackId/edit'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -48,6 +49,12 @@ const AuthenticatedFeedbacksNewIndexRoute =
     path: '/feedbacks/new/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedFeedbacksFeedbackIdIndexRoute =
+  AuthenticatedFeedbacksFeedbackIdIndexRouteImport.update({
+    id: '/feedbacks/$feedbackId/',
+    path: '/feedbacks/$feedbackId/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedFeedbacksFeedbackIdEditRoute =
   AuthenticatedFeedbacksFeedbackIdEditRouteImport.update({
     id: '/feedbacks/$feedbackId/edit',
@@ -61,6 +68,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/feedbacks/$feedbackId/edit': typeof AuthenticatedFeedbacksFeedbackIdEditRoute
+  '/feedbacks/$feedbackId': typeof AuthenticatedFeedbacksFeedbackIdIndexRoute
   '/feedbacks/new': typeof AuthenticatedFeedbacksNewIndexRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +77,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/feedbacks/$feedbackId/edit': typeof AuthenticatedFeedbacksFeedbackIdEditRoute
+  '/feedbacks/$feedbackId': typeof AuthenticatedFeedbacksFeedbackIdIndexRoute
   '/feedbacks/new': typeof AuthenticatedFeedbacksNewIndexRoute
 }
 export interface FileRoutesById {
@@ -79,6 +88,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/feedbacks/$feedbackId/edit': typeof AuthenticatedFeedbacksFeedbackIdEditRoute
+  '/_authenticated/feedbacks/$feedbackId/': typeof AuthenticatedFeedbacksFeedbackIdIndexRoute
   '/_authenticated/feedbacks/new/': typeof AuthenticatedFeedbacksNewIndexRoute
 }
 export interface FileRouteTypes {
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/feedbacks/$feedbackId/edit'
+    | '/feedbacks/$feedbackId'
     | '/feedbacks/new'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/feedbacks/$feedbackId/edit'
+    | '/feedbacks/$feedbackId'
     | '/feedbacks/new'
   id:
     | '__root__'
@@ -106,6 +118,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/dashboard/'
     | '/_authenticated/feedbacks/$feedbackId/edit'
+    | '/_authenticated/feedbacks/$feedbackId/'
     | '/_authenticated/feedbacks/new/'
   fileRoutesById: FileRoutesById
 }
@@ -159,6 +172,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFeedbacksNewIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/feedbacks/$feedbackId/': {
+      id: '/_authenticated/feedbacks/$feedbackId/'
+      path: '/feedbacks/$feedbackId'
+      fullPath: '/feedbacks/$feedbackId'
+      preLoaderRoute: typeof AuthenticatedFeedbacksFeedbackIdIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/feedbacks/$feedbackId/edit': {
       id: '/_authenticated/feedbacks/$feedbackId/edit'
       path: '/feedbacks/$feedbackId/edit'
@@ -173,6 +193,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
   AuthenticatedFeedbacksFeedbackIdEditRoute: typeof AuthenticatedFeedbacksFeedbackIdEditRoute
+  AuthenticatedFeedbacksFeedbackIdIndexRoute: typeof AuthenticatedFeedbacksFeedbackIdIndexRoute
   AuthenticatedFeedbacksNewIndexRoute: typeof AuthenticatedFeedbacksNewIndexRoute
 }
 
@@ -181,6 +202,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   AuthenticatedFeedbacksFeedbackIdEditRoute:
     AuthenticatedFeedbacksFeedbackIdEditRoute,
+  AuthenticatedFeedbacksFeedbackIdIndexRoute:
+    AuthenticatedFeedbacksFeedbackIdIndexRoute,
   AuthenticatedFeedbacksNewIndexRoute: AuthenticatedFeedbacksNewIndexRoute,
 }
 

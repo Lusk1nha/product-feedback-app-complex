@@ -4,9 +4,11 @@ import {
 	roadmapStatsResponseSchema,
 	type CreateFeedbackPayload,
 	type Feedback,
+	type ListFeedbacksPayload,
 	type RoadmapStatsResponse,
 	type UpdateFeedbackPayload,
 } from '../types/feedback.schema'
+import type { PaginatedResult } from '@/types/api.types'
 
 export const FeedbackApi = {
 	getRoadmapStats: async (): Promise<RoadmapStatsResponse> => {
@@ -18,6 +20,26 @@ export const FeedbackApi = {
 	getFeedbackById: async (id: number): Promise<Feedback> => {
 		const response = await httpClient.get<Feedback>(`/feedbacks/${id}`)
 		return feedbackSchema.parse(response)
+	},
+
+	listFeedbacks: async (
+		payload: ListFeedbacksPayload,
+		signal?: AbortSignal,
+	): Promise<PaginatedResult<Feedback[]>> => {
+		// 1. Chama o método que preserva o meta
+		const response = await httpClient.getPaginated<Feedback[]>('/feedbacks', {
+			params: payload,
+			signal,
+		})
+
+		// 2. Valida apenas os DADOS com o Zod
+		const parsedData = feedbackSchema.array().parse(response.data)
+
+		// 3. Retorna a estrutura completa
+		return {
+			data: parsedData,
+			meta: response.meta,
+		}
 	},
 
 	createFeedback: async (payload: CreateFeedbackPayload) => {

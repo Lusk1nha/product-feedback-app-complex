@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
 import { motion, type Variants } from 'motion/react'
 
@@ -11,6 +11,8 @@ import { FeedbackCategorySearchSelector } from '@/modules/feedback/components/fe
 import { FeedbackSort } from '@/modules/feedback/types/feedback.sort'
 import { RoadmapCard } from '@/components/roadmap/roadmap-card'
 import { PageShell } from '@/components/layouts/page-shell'
+
+import { ListFeedback } from '@/modules/feedback/components/list-feedback'
 
 const feedbackSearchPageValidateSearchSchema = z.object({
 	sort: z.enum(FeedbackSort).optional().default(FeedbackSort.MostUpvotes),
@@ -46,8 +48,10 @@ const itemVariants: Variants = {
 export function DashboardPage() {
 	const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
+	const { sort, category } = useSearch({ from: '/_authenticated/dashboard/' })
+
 	return (
-		<PageShell className="md:pt-14 md:pb-14 md:px-10 md:gap-y-10 md:gap-x-7.5 md:items-center lg:flex-row lg:items-start lg:justify-center">
+		<PageShell className="md:pt-14 md:pb-14 md:px-10 md:gap-y-10 md:gap-x-7.5 lg:flex-row lg:justify-center min-h-screen">
 			{/* --- Mobile Header & Sidebar --- */}
 			<div className="w-full md:hidden">
 				<MobileTopBar
@@ -73,9 +77,12 @@ export function DashboardPage() {
 			{/* --- Main Content --- */}
 			<motion.main
 				variants={itemVariants}
-				className="w-full flex flex-col gap-y-6"
+				className="flex-1 w-full flex flex-col gap-y-6"
 			>
 				<SearchFeedbacksBar />
+				<div className="flex-1 min-h-0 flex flex-col">
+					<ListFeedback category={category} sort={sort} />
+				</div>
 			</motion.main>
 		</PageShell>
 	)

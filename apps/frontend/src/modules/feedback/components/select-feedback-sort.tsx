@@ -3,13 +3,13 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import { SortFeedbackPopover } from './sort-feedback-popover'
 import {
 	getFeedbackSortLabel,
-	type FeedbackValue,
+	type FeedbackSortValue,
 } from '@/modules/feedback/types/feedback.sort'
 import { cn } from '@/lib/utils'
 
 interface SelectFeedbackSortProps {
-	currentValue: FeedbackValue
-	onSelect: (value: FeedbackValue) => void
+	currentValue: FeedbackSortValue
+	onSelect: (value: FeedbackSortValue) => void
 }
 
 export function SelectFeedbackSort({

@@ -14,15 +14,7 @@ export class CaslPermissionService implements IPermissionService {
 	ensureCan(user: User, action: Action, subject: any): void {
 		const ability = this.createAbility(user)
 
-		// Log para debug: O que estamos tentando fazer?
-		console.log('[CASL Check]', {
-			action,
-			subjectName: this.getSubjectNameSafe(subject),
-		})
-
 		if (!ability.can(action, subject)) {
-			// Se falhar, vamos ver quais regras existem para entender o porquê
-			console.log('[CASL Denied] Rules for User:', ability.rules)
 			throw new PermissionDeniedError(action, subject)
 		}
 	}

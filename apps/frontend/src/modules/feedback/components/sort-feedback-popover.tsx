@@ -10,12 +10,12 @@ import { cn } from '@/lib/utils'
 import {
 	FeedbackSort,
 	getFeedbackSortLabel,
-	type FeedbackValue,
+	type FeedbackSortValue,
 } from '@/modules/feedback/types/feedback.sort'
 
 interface SortFeedbackPopoverProps {
-	value: FeedbackValue
-	onSelect: (value: FeedbackValue) => void
+	value: FeedbackSortValue
+	onSelect: (value: FeedbackSortValue) => void
 	children: React.ReactNode
 	isOpen: boolean
 	onOpenChange: (open: boolean) => void
@@ -46,8 +46,8 @@ function SortFeedbackList({
 	currentValue,
 	onSelect,
 }: Readonly<{
-	currentValue: FeedbackValue
-	onSelect: (value: FeedbackValue) => void
+	currentValue: FeedbackSortValue
+	onSelect: (value: FeedbackSortValue) => void
 }>) {
 	return (
 		<ul className="flex flex-col w-full bg-white rounded-lg dark:bg-card overflow-hidden">

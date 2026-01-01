@@ -5,9 +5,9 @@ export const FeedbackSort = {
 	LeastComments: 'least_comments',
 } as const
 
-export type FeedbackValue = (typeof FeedbackSort)[keyof typeof FeedbackSort]
+export type FeedbackSortValue = (typeof FeedbackSort)[keyof typeof FeedbackSort]
 
-export const getFeedbackSortLabel = (sort: FeedbackValue) => {
+export const getFeedbackSortLabel = (sort: FeedbackSortValue) => {
 	switch (sort) {
 		case FeedbackSort.MostUpvotes:
 			return 'Most Upvotes'

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useAppMetadata } from '@/modules/feedback/hooks/use-app-metadata'
 import { useFeedback } from '@/modules/feedback/hooks/use-feedback-details'
 import { EditFeedbackForm } from '@/modules/feedback/components/edit-feedback-form'
@@ -6,8 +6,7 @@ import { PageShell } from '@/components/layouts/page-shell'
 
 import { motion } from 'motion/react'
 
-import { ChevronLeft } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { GoBackButton } from '@/components/common/buttons/go-back-button'
 
 export const Route = createFileRoute(
 	'/_authenticated/feedbacks/$feedbackId/edit',
@@ -17,7 +16,6 @@ export const Route = createFileRoute(
 
 export function EditFeedbackPage() {
 	const { feedbackId } = Route.useParams()
-	const navigate = useNavigate()
 
 	// 1. Fetch Data
 	const { data: metadata, isLoading: isLoadingMeta } = useAppMetadata()
@@ -45,14 +43,7 @@ export function EditFeedbackPage() {
 					initial={{ opacity: 0, x: -20 }}
 					animate={{ opacity: 1, x: 0 }}
 				>
-					<Button
-						variant="ghost"
-						onClick={() => navigate({ to: '..' })}
-						className="has-[>svg]:px-0 hover:bg-transparent text-brand-grey hover:underline font-bold"
-					>
-						<ChevronLeft className="w-4 h-4 mr-2 text-brand-blue" />
-						Go Back
-					</Button>
+					<GoBackButton to="/feedbacks/$feedbackId" params={{ feedbackId }} />
 				</motion.div>
 
 				<EditFeedbackForm initialData={feedback} metadata={metadata} />

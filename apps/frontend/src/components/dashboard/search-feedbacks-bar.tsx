@@ -1,4 +1,4 @@
-import { type FeedbackValue } from '@/modules/feedback/types/feedback.sort'
+import { type FeedbackSortValue } from '@/modules/feedback/types/feedback.sort'
 import { BulbSvg } from '../common/icons/bulb-svg'
 import { SelectFeedbackSort } from '../../modules/feedback/components/select-feedback-sort'
 import { Button } from '../ui/button'
@@ -18,7 +18,7 @@ export function SearchFeedbacksBar({
 	const navigate = useNavigate()
 
 	// 2. ATUALIZAR URL
-	const handleSortChange = (newSort: FeedbackValue) => {
+	const handleSortChange = (newSort: FeedbackSortValue) => {
 		navigate({
 			to: '.', // Fica na mesma rota
 			search: (prev) => ({ ...prev, sort: newSort }), // Atualiza só o sort

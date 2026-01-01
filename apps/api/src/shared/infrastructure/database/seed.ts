@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-
+import { faker } from '@faker-js/faker' // Importando o Faker
 import * as schema from './schema'
 import { sql } from 'drizzle-orm'
 
@@ -11,11 +11,14 @@ const pool = new Pool({
 const db = drizzle(pool, { schema })
 
 async function seed() {
-	console.log('🌱 Starting Seed...')
+	console.log('🌱 Starting Seed with Faker...')
 
-	// Como importamos * as schema, acessamos as tabelas assim: schema.feedbackCategories
+	// --- 1. Garantir Categorias e Status (Dados Fixos) ---
 
-	// 1. Categories
+	// Listas auxiliares para o Faker escolher aleatoriamente depois
+	const categorySlugs = ['ui', 'ux', 'enhancement', 'bug', 'feature']
+	const statusSlugs = ['suggestion', 'planned', 'in-progress', 'live']
+
 	await db
 		.insert(schema.feedbackCategories)
 		.values([
@@ -27,10 +30,9 @@ async function seed() {
 		])
 		.onConflictDoUpdate({
 			target: schema.feedbackCategories.slug,
-			set: { order: sql`excluded.order` }, // Atualiza a ordem mesmo se já existir
+			set: { order: sql`excluded.order` },
 		})
 
-	// 2. Statuses
 	await db
 		.insert(schema.feedbackStatuses)
 		.values([
@@ -64,6 +66,53 @@ async function seed() {
 			},
 		])
 		.onConflictDoNothing()
+
+	// --- 2. Gerar Feedbacks Dinâmicos com Faker ---
+
+	const feedbacksToInsert: (typeof schema.feedbacks.$inferInsert)[] = []
+
+	// Vamos gerar 50 itens
+	const AMOUNT_TO_GENERATE = 50
+
+	for (let i = 0; i < AMOUNT_TO_GENERATE; i++) {
+		// Gera uma data de criação no passado (últimos 6 meses)
+		const createdAt = faker.date.past({ years: 0.5 })
+
+		// A data de atualização deve ser entre a criação e agora
+		const updatedAt = faker.date.between({ from: createdAt, to: new Date() })
+
+		feedbacksToInsert.push({
+			// Gera um título estilo frase, sem o ponto final
+			title: faker.lorem.sentence({ min: 3, max: 7 }).replace('.', ''),
+
+			// Gera descrições mais ricas
+			description: faker.lorem.paragraph({ min: 1, max: 3 }),
+
+			// Escolhe aleatoriamente uma das categorias existentes
+			categorySlug: faker.helpers.arrayElement(categorySlugs),
+
+			// Escolhe aleatoriamente um status
+			// Dica: Se quiser que a maioria seja 'suggestion', podemos usar faker.helpers.weightedArrayElement (se precisar de lógica complexa)
+			// Por enquanto, aleatório simples:
+			statusSlug: faker.helpers.arrayElement(statusSlugs),
+
+			// Upvotes aleatórios entre 0 e 150
+			upvotesCount: faker.number.int({ min: 0, max: 150 }),
+
+			// IMPORTANTE: Assumindo que o author_id 1 existe.
+			// Se você tiver seeded users, pode fazer: faker.number.int({ min: 1, max: 5 })
+			authorId: faker.number.int({ min: 1, max: 2 }),
+
+			createdAt: createdAt,
+			updatedAt: updatedAt,
+			enabled: true,
+		})
+	}
+
+	// --- 3. Inserção em Massa ---
+	console.log(`⏳ Inserting ${AMOUNT_TO_GENERATE} feedbacks...`)
+
+	await db.insert(schema.feedbacks).values(feedbacksToInsert)
 
 	console.log('✅ Seed Finished!')
 	await pool.end()

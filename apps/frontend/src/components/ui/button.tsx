@@ -25,7 +25,6 @@ const buttonVariants = cva(
 				outline:
 					'border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground',
 
-				// Figma: Go Back
 				ghost:
 					'text-brand-grey hover:bg-brand-light hover:text-brand-dark hover:underline',
 
