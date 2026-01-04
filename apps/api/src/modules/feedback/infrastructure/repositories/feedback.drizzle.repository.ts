@@ -70,10 +70,14 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 	async findAll(
 		params: FindFeedbacksParams,
 	): Promise<PaginatedResult<Feedback>> {
-		const { categorySlug, sort, page, perPage } = params
+		const { categorySlug, statusSlug, sort, page, perPage } = params
 
 		// Filtros base
 		const filters: SQL[] = [eq(schema.feedbacks.enabled, true)]
+
+		if (statusSlug && statusSlug !== 'all') {
+			filters.push(eq(schema.feedbacks.statusSlug, statusSlug))
+		}
 
 		if (categorySlug && categorySlug !== 'all') {
 			filters.push(eq(schema.feedbacks.categorySlug, categorySlug))
@@ -156,7 +160,7 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 		return rows.map(FeedbackMapper.toDomain)
 	}
 
-	async countByStatus(): Promise<Record<string, number>> {
+	async countByAggregatedStatus(): Promise<Record<string, number>> {
 		const rows = await this.db
 			.select({
 				status: schema.feedbacks.statusSlug,
@@ -173,5 +177,21 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 			},
 			{} as Record<string, number>,
 		)
+	}
+
+	async countByStatus(status: string): Promise<number> {
+		const result = await this.db
+			.select({
+				count: sql<number>`cast(count(${schema.feedbacks.id}) as int)`,
+			})
+			.from(schema.feedbacks)
+			.where(
+				and(
+					eq(schema.feedbacks.statusSlug, status),
+					eq(schema.feedbacks.enabled, true),
+				),
+			)
+
+		return result[0].count
 	}
 }

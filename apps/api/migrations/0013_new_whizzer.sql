@@ -1,0 +1,1 @@
+ALTER TABLE "feedback_statuses" ADD COLUMN "description" varchar(255) NOT NULL;

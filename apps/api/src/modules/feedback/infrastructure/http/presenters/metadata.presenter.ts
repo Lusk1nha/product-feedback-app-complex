@@ -1,5 +1,5 @@
-import { FeedbackCategory } from '@/modules/feedback/domain/value-objects/feedback-category.vo'
-import { FeedbackStatus } from '@/modules/feedback/domain/value-objects/feedback-status.vo'
+import { FeedbackCategory } from '@/modules/feedback/domain/entities/reference/feedback-category.entity'
+import { FeedbackStatus } from '@/modules/feedback/domain/entities/reference/feedback-status.entity'
 import { ApiProperty } from '@nestjs/swagger'
 import { AppMetadataOutput } from 'src/modules/feedback/application/use-cases/metadata/get-app-metadata.usecase'
 
@@ -41,6 +41,9 @@ export class FeedbackStatusResponse {
 	@ApiProperty({ example: 'Planned' })
 	label: string
 
+	@ApiProperty({ example: 'Ideas prioritized for research' })
+	description: string | null
+
 	@ApiProperty({ example: '#F49F85' })
 	hexColor: string
 
@@ -62,6 +65,8 @@ export class FeedbackStatusPresenter {
 		return {
 			slug: status.slug,
 			label: status.label,
+			description: status.description,
+
 			hexColor: status.hexColor,
 			includeInRoadmap: status.includeInRoadmap(),
 			order: status.order,

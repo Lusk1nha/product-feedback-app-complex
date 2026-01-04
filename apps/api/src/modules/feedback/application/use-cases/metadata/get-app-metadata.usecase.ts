@@ -4,8 +4,8 @@ import {
 	IMetadataRepository,
 	METADATA_REPOSITORY,
 } from '../../../domain/repositories/metadata.repository.interface'
-import { FeedbackCategory } from '../../../domain/value-objects/feedback-category.vo'
-import { FeedbackStatus } from '../../../domain/value-objects/feedback-status.vo'
+import { FeedbackCategory } from '../../../domain/entities/reference/feedback-category.entity'
+import { FeedbackStatus } from '../../../domain/entities/reference/feedback-status.entity'
 
 export interface AppMetadataOutput {
 	categories: FeedbackCategory[]

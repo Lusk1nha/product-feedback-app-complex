@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Feedback } from '../../../domain/entities/feedback.entity'
-import { FeedbackStatus } from '@/modules/feedback/domain/value-objects/feedback-status.vo'
+import { FeedbackStatus } from '@/modules/feedback/domain/entities/reference/feedback-status.entity'
 import {
 	FeedbackStatusPresenter,
 	FeedbackStatusResponse,

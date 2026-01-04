@@ -1,6 +1,10 @@
 import { BaseEntity } from 'src/shared/domain/entities/base.entity'
 import { FeedbackTitleTooShortError } from '../errors/feedback-title-too-short.error'
 import { FeedbackDescriptionTooShortError } from '../errors/feedback-description-too-short.error'
+import { FeedbackCategory } from './reference/feedback-category.entity'
+import { FeedbackStatus } from './reference/feedback-status.entity'
+import { FeedbackCategoryDisabledError } from '../errors/feedback-category-disabled.error'
+import { FeedbackStatusDisabledError } from '../errors/feedback-status-disabled.error'
 
 export interface FeedbackProps {
 	title: string
@@ -25,32 +29,43 @@ export class Feedback extends BaseEntity {
 		super({ id })
 		this.props = props
 	}
-
+	
 	static create(props: {
 		title: string
 		description: string
-		categorySlug: string
 		authorId: number
+		// MUDANÇA: Exigimos os objetos, não as strings
+		category: FeedbackCategory
+		initialStatus: FeedbackStatus
 	}): Feedback {
-		if (props.title.length < 3) {
+		// 1. Validações de Texto
+		if (props.title.trim().length < 3) {
 			throw new FeedbackTitleTooShortError(3)
 		}
 
-		if (props.description.length < 10) {
+		if (props.description.trim().length < 10) {
 			throw new FeedbackDescriptionTooShortError(10)
+		}
+
+		if (!props.category.enabled) {
+			throw new FeedbackCategoryDisabledError()
+		}
+
+		if (!props.initialStatus.enabled) {
+			throw new FeedbackStatusDisabledError()
 		}
 
 		return new Feedback({
 			title: props.title,
 			description: props.description,
 			authorId: props.authorId,
-			categorySlug: props.categorySlug,
 
-			// Defaults na criação
-			statusSlug: 'suggestion',
+			// Extraímos os slugs seguros para salvar no estado interno
+			categorySlug: props.category.slug,
+			statusSlug: props.initialStatus.slug,
+
 			upvotesCount: 0,
 			enabled: true,
-
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		})
@@ -61,35 +76,16 @@ export class Feedback extends BaseEntity {
 		return new Feedback(props, id)
 	}
 
-	update(params: {
+	public update(params: {
 		title?: string
 		description?: string
-		categorySlug?: string
-		statusSlug?: string
-	}) {
-		if (params.title !== undefined) {
-			if (params.title.length < 3) {
-				throw new FeedbackTitleTooShortError(3)
-			}
-
-			this.props.title = params.title
-		}
-
-		if (params.description !== undefined) {
-			if (params.description.length < 10) {
-				throw new FeedbackDescriptionTooShortError(10)
-			}
-
-			this.props.description = params.description
-		}
-
-		if (params.categorySlug !== undefined) {
-			this.props.categorySlug = params.categorySlug
-		}
-
-		if (params.statusSlug !== undefined) {
-			this.props.statusSlug = params.statusSlug
-		}
+		newCategory?: FeedbackCategory
+		newStatus?: FeedbackStatus
+	}): void {
+		this.updateTitle(params.title)
+		this.updateDescription(params.description)
+		this.changeCategory(params.newCategory)
+		this.changeStatus(params.newStatus)
 	}
 
 	// Getters
@@ -131,5 +127,38 @@ export class Feedback extends BaseEntity {
 
 	get isUpvoted() {
 		return this.props.hasUpvoted
+	}
+
+	// --- Métodos Granulares (SRP dentro da Classe) ---
+	private updateTitle(title?: string): void {
+		if (title === undefined) return
+		if (title.trim().length < 3) throw new FeedbackTitleTooShortError(3)
+		this.props.title = title
+	}
+
+	private updateDescription(description?: string): void {
+		if (description === undefined) return
+		if (description.trim().length < 10)
+			throw new FeedbackDescriptionTooShortError(10)
+		this.props.description = description
+	}
+
+	private changeCategory(category?: FeedbackCategory): void {
+		if (!category) return
+
+		if (!category.enabled) {
+			throw new FeedbackCategoryDisabledError()
+		}
+		this.props.categorySlug = category.slug
+	}
+
+	private changeStatus(status?: FeedbackStatus): void {
+		if (!status) return
+
+		if (!status.enabled) {
+			throw new FeedbackStatusDisabledError()
+		}
+
+		this.props.statusSlug = status.slug
 	}
 }

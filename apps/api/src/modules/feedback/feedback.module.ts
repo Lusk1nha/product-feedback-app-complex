@@ -18,6 +18,7 @@ import { ListFeedbacksUseCase } from './application/use-cases/feedback/list-feed
 import { CacheModule } from '@nestjs/cache-manager'
 import { GetRoadmapDataUseCase } from './application/use-cases/feedback/get-roadmap-data.usecase'
 import { RoadmapController } from './infrastructure/http/controllers/roadmap.controller'
+import { CountFeedbacksUseCase } from './application/use-cases/feedback/count-feedbacks.usecase'
 
 @Module({
 	imports: [CacheModule.register({ ttl: 60000 })],
@@ -42,6 +43,7 @@ import { RoadmapController } from './infrastructure/http/controllers/roadmap.con
 		GetRoadmapDataUseCase,
 
 		ListFeedbacksUseCase,
+		CountFeedbacksUseCase,
 		GetFeedbackByIdUseCase,
 		CreateFeedbackUseCase,
 		UpdateFeedbackUseCase,

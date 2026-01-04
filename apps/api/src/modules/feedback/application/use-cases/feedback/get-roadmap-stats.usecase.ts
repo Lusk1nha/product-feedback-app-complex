@@ -16,6 +16,6 @@ export class GetRoadmapStatsUseCase implements IUseCase<
 	) {}
 
 	async execute(): Promise<Record<string, number>> {
-		return await this.feedbackRepository.countByStatus()
+		return await this.feedbackRepository.countByAggregatedStatus()
 	}
 }

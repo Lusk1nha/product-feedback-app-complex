@@ -1,37 +1,33 @@
 import { type FeedbackSortValue } from '@/modules/feedback/types/feedback.sort'
 import { BulbSvg } from '../common/icons/bulb-svg'
 import { SelectFeedbackSort } from '../../modules/feedback/components/select-feedback-sort'
-import { useSearch } from '@tanstack/react-router'
-import { useNavigate } from '@tanstack/react-router'
+import { useSearch, useNavigate } from '@tanstack/react-router'
 import { AddFeedbackRedirectButton } from '../common/buttons/add-feedback-redirect-button'
+import { useCountFeedbacks } from '@/modules/feedback/hooks/use-count-feedbacks'
+import { Spinner } from '../ui/spinner'
 
-interface SearchFeedbacksBarProps {
-	sugestionsFoundedLength?: number
-}
-
-export function SearchFeedbacksBar({
-	sugestionsFoundedLength = 0,
-}: Readonly<SearchFeedbacksBarProps>) {
-	// 1. LER DA URL
-
+export function SearchFeedbacksBar() {
 	const search = useSearch({ from: '/_authenticated/dashboard/' })
 	const navigate = useNavigate()
 
-	// 2. ATUALIZAR URL
+	const { data: countFeedbacks, isLoading } = useCountFeedbacks({
+		status: 'suggestion',
+	})
+
 	const handleSortChange = (newSort: FeedbackSortValue) => {
 		navigate({
-			to: '.', // Fica na mesma rota
-			search: (prev) => ({ ...prev, sort: newSort }), // Atualiza só o sort
-			replace: true, // Substitui o histórico para não poluir o botão "Voltar"
+			to: '.',
+			search: (prev) => ({ ...prev, sort: newSort }),
+			replace: true,
 		})
 	}
 
 	return (
 		<div className="bg-brand-dark w-full h-14 px-6 flex items-center justify-between md:rounded-lg md:h-18">
 			<div className="flex items-center gap-x-9.5">
-				<SuggestionsCount count={sugestionsFoundedLength} />
+				<SuggestionsCount count={countFeedbacks ?? 0} isLoading={isLoading} />
 				<SelectFeedbackSort
-					currentValue={search.sort} // Passa o valor da URL
+					currentValue={search.sort}
 					onSelect={handleSortChange}
 				/>
 			</div>
@@ -41,11 +37,24 @@ export function SearchFeedbacksBar({
 	)
 }
 
-function SuggestionsCount({ count = 0 }: Readonly<{ count: number }>) {
+function SuggestionsCount({
+	count = 0,
+	isLoading,
+}: Readonly<{ count: number; isLoading?: boolean }>) {
 	return (
 		<div className="hidden items-center gap-x-4 md:flex text-white">
 			<BulbSvg />
-			<p className="text-h3 font-medium">{`${count} Suggestions`}</p>
+
+			<div className="text-h3 font-bold text-white">
+				{isLoading ? (
+					<div className="flex items-center gap-3">
+						<Spinner className="w-5 h-5 text-white/70" />
+						<span className="opacity-80">Calculating...</span>
+					</div>
+				) : (
+					<span>{count === 0 ? 'No suggestions' : `${count} Suggestions`}</span>
+				)}
+			</div>
 		</div>
 	)
 }

@@ -14,7 +14,11 @@ export function FeedbackCard({
 	categories,
 	onClick,
 }: FeedbackCardProps) {
-	// Encontra o label da categoria ou usa o slug formatado
+	console.log({
+		categories,
+		feedback,
+	})
+
 	const categoryLabel =
 		categories?.find((c) => c.slug === feedback.categorySlug)?.label ??
 		feedback.categorySlug

@@ -34,6 +34,8 @@ export const feedbackStatuses = pgTable('feedback_statuses', {
 	slug: varchar('slug', { length: 50 }).primaryKey(),
 
 	label: varchar('label', { length: 50 }).notNull(),
+	description: varchar('description', { length: 255 }),
+
 	hexColor: varchar('hex_color', { length: 7 }).notNull(),
 
 	// Permite que o Backend diga: Planned é 1, In-Progress é 2, Live é 3.

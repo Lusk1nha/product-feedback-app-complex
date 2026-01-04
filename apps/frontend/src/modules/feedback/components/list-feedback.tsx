@@ -22,7 +22,7 @@ export function ListFeedback({ category, sort }: Readonly<ListFeedbackProps>) {
 		fetchNextPage,
 		hasNextPage,
 		isFetchingNextPage,
-	} = useInfiniteFeedbacks({ category, sort })
+	} = useInfiniteFeedbacks({ status: 'suggestion', category, sort })
 
 	const { data: metadata, isLoading: isMetadataLoading } = useAppMetadata()
 	const navigate = useNavigate()

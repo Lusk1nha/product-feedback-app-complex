@@ -54,6 +54,7 @@
 	--color-input: var(--input);
 	--color-ring: var(--ring);
 	--color-search-bar: var(--search-bar);
+	--color-brand-search-bar: var(--brand-search-bar);
 
 	--radius: 10px;
 	--radius-lg: var(--radius);
@@ -137,6 +138,7 @@
 		--ring: #ad1fea;
 
 		--search-bar: #373f68;
+		--brand-search-bar: #373f68;
 	}
 
 	.dark {
@@ -172,6 +174,7 @@
 		--ring: #ad1fea;
 
 		--search-bar: #373f68;
+		--brand-search-bar: #373f68;
 	}
 
 	* {

@@ -9,6 +9,11 @@ export class ListFeedbacksDto extends PaginationDto {
 	@IsString()
 	category?: string
 
+	@ApiPropertyOptional({ description: 'Filter by status slug' })
+	@IsOptional()
+	@IsString()
+	status?: string
+
 	@ApiPropertyOptional({ enum: FeedbackSort })
 	@IsOptional()
 	@IsEnum(FeedbackSort)

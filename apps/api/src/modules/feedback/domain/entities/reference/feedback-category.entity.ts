@@ -1,23 +1,27 @@
-import { ValueObject } from 'src/shared/domain/value-objects/base.vo'
+import { BaseEntity } from '@/shared/domain/entities/base.entity'
 
-interface CategoryProps {
+export interface FeedbackCategoryProps {
 	slug: string
 	label: string
 	order: number
-	enabled?: boolean
+	enabled: boolean
 	createdAt: Date
 	updatedAt: Date
 }
 
-export class FeedbackCategory extends ValueObject<CategoryProps> {
-	private constructor(props: CategoryProps) {
+export class FeedbackCategory extends BaseEntity {
+	private props: FeedbackCategoryProps
+
+	private constructor(props: FeedbackCategoryProps) {
 		super(props)
+		this.props = props
 	}
 
-	static create(props: CategoryProps): FeedbackCategory {
+	static create(props: FeedbackCategoryProps): FeedbackCategory {
 		return new FeedbackCategory(props)
 	}
 
+	// Identificador Principal (Identity)
 	get slug(): string {
 		return this.props.slug
 	}
@@ -42,7 +46,7 @@ export class FeedbackCategory extends ValueObject<CategoryProps> {
 		return this.props.updatedAt
 	}
 
-	getValue(): CategoryProps {
+	getValue(): FeedbackCategoryProps {
 		return this.props
 	}
 }

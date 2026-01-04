@@ -6,6 +6,7 @@ export const feedbackCategorySchema = z.object({
 	slug: z.string(),
 	label: z.string(),
 
+	order: z.coerce.number(),
 	enabled: z.boolean().optional(),
 
 	createdAt: z.coerce.date(),
@@ -15,6 +16,8 @@ export const feedbackCategorySchema = z.object({
 export const feedbackStatusSchema = z.object({
 	slug: z.string(),
 	label: z.string(),
+	description: z.string().nullable(),
+
 	hexColor: z.string(),
 	order: z.coerce.number(), // Coerce é vida!
 	includeInRoadmap: z.boolean(),
@@ -82,10 +85,18 @@ export const feedbackSchema = z.object({
 // 3. Schema do DTO de Listagem
 export const listFeedbacksSchema = paginationSchema.extend({
 	category: z.string().optional(),
+	status: z.string().optional(),
 	sort: z.enum(FeedbackSort).optional(),
 })
 
+export const countFeedbacksByStatusSchema = z.object({
+	status: z.string(),
+})
+
 export type ListFeedbacksPayload = z.infer<typeof listFeedbacksSchema>
+export type CountFeedbacksByStatusPayload = z.infer<
+	typeof countFeedbacksByStatusSchema
+>
 
 export type FeedbackCategory = z.infer<typeof feedbackCategorySchema>
 export type FeedbackStatus = z.infer<typeof feedbackStatusSchema>

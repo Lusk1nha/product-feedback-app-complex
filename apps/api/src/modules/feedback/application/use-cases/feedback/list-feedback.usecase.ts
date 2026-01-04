@@ -19,6 +19,8 @@ export interface ListFeedbacksCommand {
 	currentUser: User
 
 	category?: string
+	status?: string
+
 	sort?: FeedbackSort
 
 	page?: number
@@ -47,6 +49,7 @@ export class ListFeedbacksUseCase implements IUseCase<
 
 		return this.feedbackRepository.findAll({
 			categorySlug: command.category,
+			statusSlug: command.status,
 			sort: command.sort,
 			page: command.page || 1, // Default seguro
 			perPage: command.perPage || 10, // Default seguro

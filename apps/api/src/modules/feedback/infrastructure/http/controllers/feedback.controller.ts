@@ -30,7 +30,8 @@ import { UpdateFeedbackDto } from '../dtos/feedback/update-feedback.dto'
 import { ListFeedbacksDto } from '../dtos/feedback/list-feedbacks.dto'
 import { ListFeedbacksUseCase } from 'src/modules/feedback/application/use-cases/feedback/list-feedback.usecase'
 import { toCollection } from 'src/shared/interface/http/presenters/collection.presenter'
-import { GetRoadmapDataUseCase } from '@/modules/feedback/application/use-cases/feedback/get-roadmap-data.usecase'
+import { CountFeedbacksDto } from '../dtos/feedback/count-feedbacks.dto'
+import { CountFeedbacksUseCase } from '@/modules/feedback/application/use-cases/feedback/count-feedbacks.usecase'
 
 @ApiTags('Feedbacks')
 @Controller('feedbacks')
@@ -39,6 +40,7 @@ export class FeedbackController {
 	constructor(
 		private readonly getFeedbackByIdUseCase: GetFeedbackByIdUseCase,
 		private readonly listFeedbacksUseCase: ListFeedbacksUseCase,
+		private readonly countFeedbacksUseCase: CountFeedbacksUseCase,
 
 		private readonly createFeedbackUseCase: CreateFeedbackUseCase,
 		private readonly updateFeedbackUseCase: UpdateFeedbackUseCase,
@@ -67,6 +69,28 @@ export class FeedbackController {
 		})
 
 		return FeedbackPresenter.toHTTP(feedback)
+	}
+
+	@ApiOperation({ summary: 'Count feedbacks by status' })
+	@ApiResponse({
+		status: HttpStatus.OK,
+		description: 'Count of feedbacks by status',
+		type: CountFeedbacksDto,
+	})
+	@Get('count')
+	@HttpCode(HttpStatus.OK)
+	async count(
+		@Query() query: CountFeedbacksDto,
+		@CurrentUser() currentUser: User,
+	) {
+		const total = await this.countFeedbacksUseCase.execute({
+			currentUser,
+			status: query.status,
+		})
+
+		console.log(total)
+
+		return total
 	}
 
 	@ApiOperation({ summary: 'Get a feedback by id' })
@@ -145,9 +169,10 @@ export class FeedbackController {
 		const result = await this.listFeedbacksUseCase.execute({
 			currentUser,
 			category: query.category,
+			status: query.status,
 			sort: query.sort,
-			page: query.page, // Vem do DTO herdado
-			perPage: query.perPage, // Vem do DTO herdado
+			page: query.page,
+			perPage: query.perPage,
 		})
 
 		return toCollection(result, FeedbackPresenter.toHTTP)

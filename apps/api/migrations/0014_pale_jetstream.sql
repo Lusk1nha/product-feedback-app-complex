@@ -1,0 +1,1 @@
+ALTER TABLE "feedback_statuses" ALTER COLUMN "description" DROP NOT NULL;

@@ -11,6 +11,12 @@ import {
 	PERMISSION_SERVICE,
 } from 'src/modules/iam/application/ports/permission.service.interface'
 import { Action } from 'src/modules/iam/infrastructure/types/permission.types'
+import {
+	IMetadataRepository,
+	METADATA_REPOSITORY,
+} from '@/modules/feedback/domain/repositories/metadata.repository.interface'
+import { FeedbackStatusInvalidError } from '@/modules/feedback/domain/errors/feedback-status-invalid.error'
+import { FeedbackCategoryInvalidError } from '@/modules/feedback/domain/errors/feedback-category-invalid.error'
 
 export interface CreateFeedbackCommand {
 	currentUser: User
@@ -26,9 +32,14 @@ export class CreateFeedbackUseCase implements IUseCase<
 	CreateFeedbackCommand,
 	Feedback
 > {
+	private readonly DEFAULT_INITIAL_STATUS = 'suggestion'
+
 	constructor(
 		@Inject(FEEDBACK_REPOSITORY)
 		private readonly feedbackRepository: IFeedbackRepository,
+
+		@Inject(METADATA_REPOSITORY)
+		private readonly metadataRepository: IMetadataRepository,
 
 		@Inject(PERMISSION_SERVICE)
 		private readonly permissionService: IPermissionService,
@@ -41,15 +52,25 @@ export class CreateFeedbackUseCase implements IUseCase<
 			'Feedback',
 		)
 
+		// 1. Busca as referências
+		const [initialStatus, category] = await Promise.all([
+			this.metadataRepository.findStatusBySlug(this.DEFAULT_INITIAL_STATUS),
+			this.metadataRepository.findCategoryBySlug(command.params.categorySlug),
+		])
+
+		// 2. Garante existência (Fail Fast)
+		if (!initialStatus) throw new FeedbackStatusInvalidError()
+		if (!category) throw new FeedbackCategoryInvalidError()
+
+		// 3. Criação passando Objetos Ricos
 		const newFeedback = Feedback.create({
 			title: command.params.title,
 			description: command.params.description,
-			categorySlug: command.params.categorySlug,
 			authorId: command.currentUser.id,
+			category: category,
+			initialStatus: initialStatus,
 		})
 
-		const savedFeedback = await this.feedbackRepository.create(newFeedback)
-
-		return savedFeedback
+		return await this.feedbackRepository.create(newFeedback)
 	}
 }

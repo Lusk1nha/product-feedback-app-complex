@@ -1,6 +1,7 @@
 import { httpClient } from '@/lib/api-client'
 import {
 	feedbackSchema,
+	type CountFeedbacksByStatusPayload,
 	type CreateFeedbackPayload,
 	type Feedback,
 	type ListFeedbacksPayload,
@@ -32,6 +33,13 @@ export const FeedbackApi = {
 			data: parsedData,
 			meta: response.meta,
 		}
+	},
+
+	countFeedbacksByStatus: async (payload: CountFeedbacksByStatusPayload) => {
+		const response = await httpClient.get<number>(`/feedbacks/count`, {
+			params: payload,
+		})
+		return response
 	},
 
 	createFeedback: async (payload: CreateFeedbackPayload) => {
