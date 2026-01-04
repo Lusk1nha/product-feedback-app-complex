@@ -10,15 +10,13 @@ import {
 	Post,
 	Put,
 	Query,
-	UseInterceptors,
 } from '@nestjs/common'
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
-import { GetRoadmapStatsUseCase } from '../../../application/use-cases/feedback/get-roadmap-stats.usecase'
+
 import { Auth } from 'src/shared/infrastructure/http/decorators/auth.decorator'
 import {
 	FeedbackPresenter,
 	FeedbackResponse,
-	RoadmapStatsPresenter,
 } from '../presenters/feedback.presenter'
 import { CreateFeedbackDto } from '../dtos/feedback/create-feedback.dto'
 import { User } from 'src/modules/iam/domain/entities/user.entity'
@@ -32,15 +30,13 @@ import { UpdateFeedbackDto } from '../dtos/feedback/update-feedback.dto'
 import { ListFeedbacksDto } from '../dtos/feedback/list-feedbacks.dto'
 import { ListFeedbacksUseCase } from 'src/modules/feedback/application/use-cases/feedback/list-feedback.usecase'
 import { toCollection } from 'src/shared/interface/http/presenters/collection.presenter'
-import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager'
+import { GetRoadmapDataUseCase } from '@/modules/feedback/application/use-cases/feedback/get-roadmap-data.usecase'
 
 @ApiTags('Feedbacks')
 @Controller('feedbacks')
 @Auth()
 export class FeedbackController {
 	constructor(
-		private readonly getRoadmapStatsUseCase: GetRoadmapStatsUseCase,
-
 		private readonly getFeedbackByIdUseCase: GetFeedbackByIdUseCase,
 		private readonly listFeedbacksUseCase: ListFeedbacksUseCase,
 
@@ -48,20 +44,6 @@ export class FeedbackController {
 		private readonly updateFeedbackUseCase: UpdateFeedbackUseCase,
 		private readonly deleteFeedbackUseCase: DeleteFeedbackUseCase,
 	) {}
-
-	@ApiOperation({ summary: 'Get feedback counts by status' })
-	@ApiResponse({
-		status: HttpStatus.OK,
-		description: 'Returns a map of status slugs to their counts',
-	})
-	@Get('stats')
-	@UseInterceptors(CacheInterceptor)
-	@CacheTTL(60000)
-	@HttpCode(HttpStatus.OK)
-	async getStats() {
-		const stats = await this.getRoadmapStatsUseCase.execute()
-		return RoadmapStatsPresenter.toHTTP(stats)
-	}
 
 	@ApiOperation({ summary: 'Create a new feedback' })
 	@ApiResponse({

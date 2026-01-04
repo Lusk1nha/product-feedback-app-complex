@@ -2,7 +2,7 @@ import { httpClient } from '@/lib/api-client'
 import {
 	metadataResponseSchema,
 	type MetadataResponse,
-} from '../types/feedback.schema'
+} from '../types/metadata.schema'
 
 export const MetadataAppApi = {
 	/**

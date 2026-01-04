@@ -1,22 +1,14 @@
 import { httpClient } from '@/lib/api-client'
 import {
 	feedbackSchema,
-	roadmapStatsResponseSchema,
 	type CreateFeedbackPayload,
 	type Feedback,
 	type ListFeedbacksPayload,
-	type RoadmapStatsResponse,
 	type UpdateFeedbackPayload,
 } from '../types/feedback.schema'
 import type { PaginatedResult } from '@/types/api.types'
 
 export const FeedbackApi = {
-	getRoadmapStats: async (): Promise<RoadmapStatsResponse> => {
-		const response =
-			await httpClient.get<RoadmapStatsResponse>('/feedbacks/stats')
-		return roadmapStatsResponseSchema.parse(response)
-	},
-
 	getFeedbackById: async (id: number): Promise<Feedback> => {
 		const response = await httpClient.get<Feedback>(`/feedbacks/${id}`)
 		return feedbackSchema.parse(response)

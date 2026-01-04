@@ -1,9 +1,9 @@
 import { type FeedbackSortValue } from '@/modules/feedback/types/feedback.sort'
 import { BulbSvg } from '../common/icons/bulb-svg'
 import { SelectFeedbackSort } from '../../modules/feedback/components/select-feedback-sort'
-import { Button } from '../ui/button'
-import { Link, useSearch } from '@tanstack/react-router'
+import { useSearch } from '@tanstack/react-router'
 import { useNavigate } from '@tanstack/react-router'
+import { AddFeedbackRedirectButton } from '../common/buttons/add-feedback-redirect-button'
 
 interface SearchFeedbacksBarProps {
 	sugestionsFoundedLength?: number
@@ -36,14 +36,7 @@ export function SearchFeedbacksBar({
 				/>
 			</div>
 
-			<Link to="/feedbacks/new">
-				<Button
-					type="button"
-					className="text-h4 font-bold h-10 bg-brand-purple hover:bg-brand-purple/80 text-white md:h-11"
-				>
-					+ Add Feedback
-				</Button>
-			</Link>
+			<AddFeedbackRedirectButton />
 		</div>
 	)
 }

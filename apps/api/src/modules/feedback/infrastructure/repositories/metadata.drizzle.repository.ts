@@ -54,4 +54,24 @@ export class MetadataDrizzleRepository implements IMetadataRepository {
 			}),
 		)
 	}
+
+	async findStatusesIncludedInRoadmap(): Promise<FeedbackStatus[]> {
+		const rows = await this.db
+			.select()
+			.from(schema.feedbackStatuses)
+			.where(eq(schema.feedbackStatuses.includeInRoadmap, true))
+
+		return rows?.map((row) =>
+			FeedbackStatus.create({
+				slug: row.slug,
+				label: row.label,
+				hexColor: row.hexColor,
+				order: row.order,
+				includeInRoadmap: row.includeInRoadmap,
+				enabled: row.enabled,
+				createdAt: row.createdAt,
+				updatedAt: row.updatedAt,
+			}),
+		)
+	}
 }

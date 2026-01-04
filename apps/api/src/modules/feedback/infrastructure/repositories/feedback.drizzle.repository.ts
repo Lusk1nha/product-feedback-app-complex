@@ -73,7 +73,8 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 		const { categorySlug, sort, page, perPage } = params
 
 		// Filtros base
-		const filters: SQL[] = []
+		const filters: SQL[] = [eq(schema.feedbacks.enabled, true)]
+
 		if (categorySlug && categorySlug !== 'all') {
 			filters.push(eq(schema.feedbacks.categorySlug, categorySlug))
 		}
@@ -96,6 +97,9 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 				break
 
 			case FeedbackSort.MOST_UPVOTES:
+				orderByClause = desc(schema.feedbacks.upvotesCount)
+				break
+
 			default:
 				orderByClause = desc(schema.feedbacks.upvotesCount)
 				break
@@ -136,6 +140,20 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 				lastPage,
 			},
 		}
+	}
+
+	async findAllByStatusSlug(statusSlug: string): Promise<Feedback[]> {
+		const rows = await this.db
+			.select()
+			.from(schema.feedbacks)
+			.where(
+				and(
+					eq(schema.feedbacks.statusSlug, statusSlug),
+					eq(schema.feedbacks.enabled, true),
+				),
+			)
+
+		return rows.map(FeedbackMapper.toDomain)
 	}
 
 	async countByStatus(): Promise<Record<string, number>> {

@@ -17,8 +17,10 @@ export interface IFeedbackRepository {
 	delete(feedback: Feedback): Promise<void>
 
 	countByStatus(): Promise<Record<string, number>>
+
 	findById(id: number): Promise<Feedback | null>
 	findByIdOrThrow(id: number): Promise<Feedback>
 
 	findAll(params: FindFeedbacksParams): Promise<PaginatedResult<Feedback>>
+	findAllByStatusSlug(statusSlug: string): Promise<Feedback[]>
 }

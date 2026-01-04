@@ -16,10 +16,12 @@ import { GetFeedbackByIdUseCase } from './application/use-cases/feedback/get-fee
 import { UpdateFeedbackUseCase } from './application/use-cases/feedback/update-feedback.usecase'
 import { ListFeedbacksUseCase } from './application/use-cases/feedback/list-feedback.usecase'
 import { CacheModule } from '@nestjs/cache-manager'
+import { GetRoadmapDataUseCase } from './application/use-cases/feedback/get-roadmap-data.usecase'
+import { RoadmapController } from './infrastructure/http/controllers/roadmap.controller'
 
 @Module({
 	imports: [CacheModule.register({ ttl: 60000 })],
-	controllers: [FeedbackController, MetadataController],
+	controllers: [FeedbackController, MetadataController, RoadmapController],
 	providers: [
 		// 1. Repositories (Binding Interface -> Implementation)
 		{
@@ -37,6 +39,7 @@ import { CacheModule } from '@nestjs/cache-manager'
 		// 2. Use Cases
 		GetAppMetadataUseCase,
 		GetRoadmapStatsUseCase,
+		GetRoadmapDataUseCase,
 
 		ListFeedbacksUseCase,
 		GetFeedbackByIdUseCase,

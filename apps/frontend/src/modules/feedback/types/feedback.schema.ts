@@ -25,17 +25,6 @@ export const feedbackStatusSchema = z.object({
 	updatedAt: z.coerce.date(),
 })
 
-export const metadataResponseSchema = z.object({
-	feedback: z.object({
-		categories: z.array(feedbackCategorySchema),
-		statuses: z.array(feedbackStatusSchema),
-	}),
-})
-
-export const roadmapStatsResponseSchema = z.object({
-	stats: z.record(z.string(), z.number()),
-})
-
 export const createFeedbackSchema = z.object({
 	title: z
 		.string({ error: 'Title is required' })
@@ -90,7 +79,6 @@ export const feedbackSchema = z.object({
 	updatedAt: z.coerce.date(),
 })
 
-
 // 3. Schema do DTO de Listagem
 export const listFeedbacksSchema = paginationSchema.extend({
 	category: z.string().optional(),
@@ -106,6 +94,3 @@ export type CreateFeedbackPayload = z.infer<typeof createFeedbackSchema>
 export type UpdateFeedbackPayload = z.infer<typeof updateFeedbackSchema>
 
 export type Feedback = z.infer<typeof feedbackSchema>
-
-export type MetadataResponse = z.infer<typeof metadataResponseSchema>
-export type RoadmapStatsResponse = z.infer<typeof roadmapStatsResponseSchema>

@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { FeedbackApi } from '../api/feedback.api'
+import { RoadmapApi } from '../api/roadmap.api'
 
 export function useRoadmapStats() {
 	return useQuery({
 		queryKey: ['roadmap-stats'],
-		queryFn: FeedbackApi.getRoadmapStats,
+		queryFn: RoadmapApi.getRoadmapStats,
 
 		// Cache de 5 minutos, pois contagem não muda a cada milissegundo
 		staleTime: 1000 * 60 * 5,

@@ -8,7 +8,6 @@ interface PageShellProps extends HTMLMotionProps<'div'> {
 	className?: string
 }
 
-// Centralizamos as variantes aqui
 export const pageContainerVariants: Variants = {
 	hidden: { opacity: 0 },
 	visible: {

@@ -1,7 +1,9 @@
+import { FeedbackCategory } from '@/modules/feedback/domain/value-objects/feedback-category.vo'
+import { FeedbackStatus } from '@/modules/feedback/domain/value-objects/feedback-status.vo'
 import { ApiProperty } from '@nestjs/swagger'
 import { AppMetadataOutput } from 'src/modules/feedback/application/use-cases/metadata/get-app-metadata.usecase'
 
-export class CategoryResponse {
+export class FeedbackCategoryResponse {
 	@ApiProperty({ example: 'ui' })
 	slug: string
 
@@ -18,7 +20,21 @@ export class CategoryResponse {
 	updatedAt: Date
 }
 
-export class StatusResponse {
+export class FeedbackCategoryPresenter {
+	static toHTTP(category: FeedbackCategory): FeedbackCategoryResponse {
+		return {
+			slug: category.slug,
+			label: category.label,
+
+			order: category.order,
+
+			createdAt: category.createdAt,
+			updatedAt: category.updatedAt,
+		}
+	}
+}
+
+export class FeedbackStatusResponse {
 	@ApiProperty({ example: 'planned' })
 	slug: string
 
@@ -41,20 +57,35 @@ export class StatusResponse {
 	updatedAt: Date
 }
 
+export class FeedbackStatusPresenter {
+	static toHTTP(status: FeedbackStatus): FeedbackStatusResponse {
+		return {
+			slug: status.slug,
+			label: status.label,
+			hexColor: status.hexColor,
+			includeInRoadmap: status.includeInRoadmap(),
+			order: status.order,
+
+			createdAt: status.createdAt,
+			updatedAt: status.updatedAt,
+		}
+	}
+}
+
 class FeedbackResponse {
 	@ApiProperty({
 		name: 'categories',
 		description: 'Feedback categories',
-		type: [CategoryResponse],
+		type: [FeedbackCategoryResponse],
 	})
-	categories: CategoryResponse[]
+	categories: FeedbackCategoryResponse[]
 
 	@ApiProperty({
 		name: 'statuses',
 		description: 'Feedback statuses',
-		type: [StatusResponse],
+		type: [FeedbackStatusResponse],
 	})
-	statuses: StatusResponse[]
+	statuses: FeedbackStatusResponse[]
 }
 
 export class AppMetadataResponse {
@@ -70,26 +101,13 @@ export class MetadataPresenter {
 	static toHTTP(output: AppMetadataOutput): AppMetadataResponse {
 		return {
 			feedback: {
-				categories: output.categories.map((category) => ({
-					slug: category.slug,
-					label: category.label,
+				categories: output.categories.map((category) =>
+					FeedbackCategoryPresenter.toHTTP(category),
+				),
 
-					order: category.order,
-
-					createdAt: category.createdAt,
-					updatedAt: category.updatedAt,
-				})),
-
-				statuses: output.statuses.map((status) => ({
-					slug: status.slug,
-					label: status.label,
-					hexColor: status.hexColor,
-					includeInRoadmap: status.includeInRoadmap(),
-					order: status.order,
-
-					createdAt: status.createdAt,
-					updatedAt: status.updatedAt,
-				})),
+				statuses: output.statuses.map((status) =>
+					FeedbackStatusPresenter.toHTTP(status),
+				),
 			},
 		}
 	}

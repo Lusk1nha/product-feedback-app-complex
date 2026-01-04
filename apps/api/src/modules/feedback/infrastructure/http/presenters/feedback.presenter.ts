@@ -1,20 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Feedback } from '../../../domain/entities/feedback.entity'
 
-export class RoadmapStatsResponse {
-	@ApiProperty({
-		example: { planned: 5, 'in-progress': 2, live: 1 },
-		description: 'Map of status slugs to their count',
-	})
-	stats: Record<string, number>
-}
-
-export class RoadmapStatsPresenter {
-	static toHTTP(stats: Record<string, number>): RoadmapStatsResponse {
-		return { stats }
-	}
-}
-
 export class FeedbackResponse {
 	@ApiProperty({ example: 1 })
 	id: number // <--- Ajustado para number

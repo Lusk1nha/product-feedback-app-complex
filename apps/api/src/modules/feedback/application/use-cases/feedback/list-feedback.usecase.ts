@@ -20,6 +20,7 @@ export interface ListFeedbacksCommand {
 
 	category?: string
 	sort?: FeedbackSort
+
 	page?: number
 	perPage?: number
 }
