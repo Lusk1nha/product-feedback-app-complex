@@ -14,11 +14,6 @@ export function FeedbackCard({
 	categories,
 	onClick,
 }: FeedbackCardProps) {
-	console.log({
-		categories,
-		feedback,
-	})
-
 	const categoryLabel =
 		categories?.find((c) => c.slug === feedback.categorySlug)?.label ??
 		feedback.categorySlug

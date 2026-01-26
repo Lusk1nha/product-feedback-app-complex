@@ -4,8 +4,8 @@ import Config
 config :realtime, Realtime.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "db", # <--- MUDOU DE "localhost" PARA "db"
-  database: "product_feedback", # <--- NOME DO SEU BANCO
+  hostname: System.get_env("DATABASE_HOST") || "localhost",
+  database: "product_feedback",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10

@@ -92,27 +92,27 @@ services:
     networks:
       - app-network
 
-  realtime:
-    image: elixir:1.18-alpine
-    container_name: product_feedback_realtime
-    # Instala gerenciadores de pacote e roda o servidor
-    command: sh -c "mix local.hex --force && mix local.rebar --force && mix deps.get && mix phx.server"
-    working_dir: /app
-    volumes:
-      - ./apps/realtime:/app
-    ports:
-      - "4000:4000"
-    environment:
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-changeme}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-changeme}
-      PHX_HOST: "localhost"
-    depends_on:
-      - db
-      - redis
-    networks:
-      - app-network      
+  # realtime:
+  #   image: elixir:1.18-alpine
+  #   container_name: product_feedback_realtime
+  #   # Instala gerenciadores de pacote e roda o servidor
+  #   command: sh -c "mix local.hex --force && mix local.rebar --force && mix deps.get && mix phx.server"
+  #   working_dir: /app
+  #   volumes:
+  #     - ./apps/realtime:/app
+  #   ports:
+  #     - "4000:4000"
+  #   environment:
+  #     JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-changeme}
+  #     REDIS_HOST: redis
+  #     REDIS_PORT: 6379
+  #     SECRET_KEY_BASE: ${SECRET_KEY_BASE:-changeme}
+  #     PHX_HOST: "localhost"
+  #   depends_on:
+  #     - db
+  #     - redis
+  #   networks:
+  #     - app-network      
 
 # Definição da Rede
 networks:
