@@ -26,6 +26,7 @@ services:
       FRONTEND_URL: http://localhost:5173
     depends_on:
       - db
+      - redis
     networks:
       # <--- FALTAVA ISSO
       - app-network
@@ -68,6 +69,28 @@ services:
     networks:
       # <--- FALTAVA ISSO
       - app-network
+    # --- Redis Service ---
+  redis:
+    image: redis:alpine
+    container_name: product_feedback_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    # Opcional: Persistência de dados (geralmente pub/sub não precisa, mas é bom ter)
+    command: redis-server --appendonly yes 
+    volumes:
+      - redis_data:/data
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: product_feedback_redis_insight
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+    networks:
+      - app-network
 
 # Definição da Rede
 networks:
@@ -77,3 +100,4 @@ networks:
 # Definição do Volume Persistente
 volumes:
   postgres_data:
+  redis_data:

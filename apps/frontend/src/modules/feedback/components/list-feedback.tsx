@@ -1,13 +1,15 @@
+import type { FeedbackSortValue } from '../types/feedback.sort'
+
 import { motion } from 'motion/react'
-import { MessageSquareDashed } from 'lucide-react'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { InfiniteScrollTrigger } from '@/components/common/infinite-scroll-trigger'
 import { useInfiniteFeedbacks } from '../hooks/use-infinite-feedbacks'
 import { useAppMetadata } from '../hooks/use-app-metadata'
 import { FeedbackCard } from './feedback-card'
-import type { FeedbackSortValue } from '../types/feedback.sort'
 import { useNavigate } from '@tanstack/react-router'
+import { NotFoundIcon } from '@/components/common/icons/not-found-icon'
+import { AddFeedbackRedirectButton } from '@/components/common/buttons/add-feedback-redirect-button'
 
 interface ListFeedbackProps {
 	category: string
@@ -88,18 +90,20 @@ function EmptyState() {
 		<motion.div
 			initial={{ opacity: 0, scale: 0.95 }}
 			animate={{ opacity: 1, scale: 1 }}
-			className="flex flex-1 flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-10 text-center"
+			className="flex flex-1 flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-10 text-center gap-y-6"
 		>
-			<div className="mb-4 rounded-full bg-brand-light p-4">
-				<MessageSquareDashed className="h-8 w-8 text-brand-grey/50" />
-			</div>
-			<h3 className="mb-2 text-h3 text-brand-dark">
-				Nenhum feedback encontrado
-			</h3>
-			<p className="max-w-[300px] text-body-1 text-brand-grey">
-				Parece que não há nada aqui para essa categoria. Seja o primeiro a
-				contribuir!
-			</p>
+			<NotFoundIcon />
+
+			<section className="flex flex-col gap-3.5">
+				<h3 className="text-h3 text-brand-dark">There is no feedback yet.</h3>
+
+				<p className="max-w-[300px] text-body-1 text-brand-grey">
+					Got a suggestion? Found a bug that needs to be squashed? We love
+					hearing about new ideas to improve our app.
+				</p>
+			</section>
+
+			<AddFeedbackRedirectButton />
 		</motion.div>
 	)
 }

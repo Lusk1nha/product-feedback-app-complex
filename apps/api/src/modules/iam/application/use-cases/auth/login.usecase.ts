@@ -26,8 +26,10 @@ export interface LoginCommand {
 export class LoginUseCase implements IUseCase<LoginCommand, AuthTokens> {
 	constructor(
 		@Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
+
 		@Inject(REFRESH_TOKEN_REPOSITORY)
 		private readonly refreshTokenRepository: IRefreshTokenRepository,
+		
 		@Inject(TOKEN_PROVIDER) private readonly tokenProvider: ITokenProvider,
 		private readonly hashingService: HashingService,
 	) {}

@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { User } from 'src/modules/iam/domain/entities/user.entity'
-import { UserNotFoundError } from 'src/modules/iam/domain/errors/user-not-found.error'
 import { UserConflictError } from 'src/modules/iam/domain/errors/user-conflict.error' // Novo erro
 import {
 	IUserRepository,

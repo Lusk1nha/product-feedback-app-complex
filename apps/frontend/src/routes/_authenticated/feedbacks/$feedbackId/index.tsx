@@ -41,7 +41,7 @@ export function FeedbackPage() {
 
 	return (
 		<PageShell className="pt-8.5 pb-8 md:pt-14">
-			<div className="max-w-5xl w-full mx-auto flex flex-col gap-6">
+			<div className="max-w-5xl w-full mx-auto flex flex-col gap-6 px-6">
 				<div className="flex items-center justify-between gap-4">
 					<motion.div
 						initial={{ opacity: 0, x: -20 }}

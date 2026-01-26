@@ -18,6 +18,10 @@ import {
 import { FeedbackStatusInvalidError } from '@/modules/feedback/domain/errors/feedback-status-invalid.error'
 import { FeedbackCategoryInvalidError } from '@/modules/feedback/domain/errors/feedback-category-invalid.error'
 
+import { PubSubChannel } from '@/shared/application/ports/pub-sub.contract'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { FeedbackCreatedEvent } from '@/modules/feedback/domain/events/feedback-created.event'
+
 export interface CreateFeedbackCommand {
 	currentUser: User
 	params: {
@@ -43,6 +47,8 @@ export class CreateFeedbackUseCase implements IUseCase<
 
 		@Inject(PERMISSION_SERVICE)
 		private readonly permissionService: IPermissionService,
+
+		private readonly eventEmitter: EventEmitter2,
 	) {}
 
 	async execute(command: CreateFeedbackCommand): Promise<Feedback> {
@@ -63,7 +69,7 @@ export class CreateFeedbackUseCase implements IUseCase<
 		if (!category) throw new FeedbackCategoryInvalidError()
 
 		// 3. Criação passando Objetos Ricos
-		const newFeedback = Feedback.create({
+		const feedbackCandidate = Feedback.create({
 			title: command.params.title,
 			description: command.params.description,
 			authorId: command.currentUser.id,
@@ -71,6 +77,19 @@ export class CreateFeedbackUseCase implements IUseCase<
 			initialStatus: initialStatus,
 		})
 
-		return await this.feedbackRepository.create(newFeedback)
+		const feedback = await this.feedbackRepository.create(feedbackCandidate)
+
+		this.eventEmitter.emit(
+			FeedbackCreatedEvent.EVENT_NAME,
+			new FeedbackCreatedEvent({
+				id: feedback.id,
+				title: feedback.title,
+				categorySlug: feedback.categorySlug,
+				statusSlug: feedback.statusSlug,
+				createdAt: feedback.createdAt,
+			}),
+		)
+
+		return feedback
 	}
 }

@@ -19,6 +19,7 @@ import { CacheModule } from '@nestjs/cache-manager'
 import { GetRoadmapDataUseCase } from './application/use-cases/feedback/get-roadmap-data.usecase'
 import { RoadmapController } from './infrastructure/http/controllers/roadmap.controller'
 import { CountFeedbacksUseCase } from './application/use-cases/feedback/count-feedbacks.usecase'
+import { FeedbackRedisListener } from './infrastructure/listeners/feedback-redis.listener'
 
 @Module({
 	imports: [CacheModule.register({ ttl: 60000 })],
@@ -48,6 +49,8 @@ import { CountFeedbacksUseCase } from './application/use-cases/feedback/count-fe
 		CreateFeedbackUseCase,
 		UpdateFeedbackUseCase,
 		DeleteFeedbackUseCase,
+
+		FeedbackRedisListener,
 	],
 	exports: [METADATA_REPOSITORY, FEEDBACK_REPOSITORY],
 })

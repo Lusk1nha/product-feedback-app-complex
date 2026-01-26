@@ -82,7 +82,7 @@ async function seed() {
 
 	// --- 2. Inserção em Massa com Batching ---
 
-	const TOTAL_RECORDS = 1_000_000
+	const TOTAL_RECORDS = 1_000
 	const BATCH_SIZE = 2000 // Tamanho seguro para o Postgres (evita erro de max params)
 
 	console.log(

@@ -24,6 +24,9 @@ export const envSchema = z.object({
 
 	JWT_ACCESS_EXPIRES_IN_MS: z.coerce.number().default(15 * 60 * 1000), // 15 min
 	JWT_REFRESH_EXPIRES_IN_MS: z.coerce.number().default(7 * 24 * 60 * 60 * 1000), // 7 dias
+
+	REDIS_HOST: z.string(),
+	REDIS_PORT: z.coerce.number().default(6379),
 })
 
 export type Env = z.infer<typeof envSchema>

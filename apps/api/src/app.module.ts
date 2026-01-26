@@ -16,6 +16,8 @@ import { FeedbackModule } from './modules/feedback/feedback.module'
 import { HealthModule } from './shared/infrastructure/health/health.module'
 
 import { randomUUID } from 'crypto' // 👈 Importe nativo do Node.js
+import { RedisModule } from './shared/infrastructure/redis/redis.module'
+import { EventEmitterModule } from '@nestjs/event-emitter'
 
 @Module({
 	imports: [
@@ -27,6 +29,8 @@ import { randomUUID } from 'crypto' // 👈 Importe nativo do Node.js
 			envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
 			validate,
 		}),
+
+		EventEmitterModule.forRoot(),
 
 		// 2. Throttling (Rate Limiting) Assíncrono
 		ThrottlerModule.forRootAsync({
@@ -95,6 +99,8 @@ import { randomUUID } from 'crypto' // 👈 Importe nativo do Node.js
 
 		// 4. Módulos de Domínio e Infraestrutura
 		DatabaseModule,
+		RedisModule,
+
 		SharedModule,
 		HealthModule,
 
