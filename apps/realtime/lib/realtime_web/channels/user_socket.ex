@@ -3,22 +3,22 @@ defmodule RealtimeWeb.UserSocket do
   require Logger
 
   ## Channels
-  channel "feedbacks:*", RealtimeWeb.FeedbackChannel
+  channel("feedbacks:*", RealtimeWeb.FeedbackChannel)
 
   @impl true
   def connect(%{"token" => token}, socket, _connect_info) do
     case Realtime.Auth.Token.verify_jwt(token) do
       {:ok, claims} ->
         # Token Válido!
-        user_id = claims["sub"] # "sub" é onde o NestJS guarda o ID por padrão
+        # "sub" é onde o NestJS guarda o ID por padrão
+        user_id = claims["sub"]
         Logger.info("✅ Usuário #{user_id} conectado via WebSocket")
 
         # Salvamos o ID no socket para usar depois (ex: autorizar canais específicos)
         {:ok, assign(socket, :current_user_id, user_id)}
 
+      # <-- mude de _reason para reason
       {:error, _reason} ->
-        # Token Inválido ou Expirado
-        Logger.warning("⛔ Tentativa de conexão WebSocket recusada: Token inválido")
         :error
     end
   end

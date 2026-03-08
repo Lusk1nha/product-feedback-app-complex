@@ -11,10 +11,12 @@ import {
 	PERMISSION_SERVICE,
 } from 'src/modules/iam/application/ports/permission.service.interface'
 import { Action } from 'src/modules/iam/infrastructure/types/permission.types'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { FeedbackDeletedEvent } from '@/modules/feedback/domain/events/feedback-deleted.event'
 
 interface DeleteFeedbackCommand {
-	feedbackId: number
 	currentUser: User
+	feedbackId: number
 }
 
 @Injectable()
@@ -28,6 +30,8 @@ export class DeleteFeedbackUseCase implements IUseCase<
 
 		@Inject(PERMISSION_SERVICE)
 		private readonly permissionService: IPermissionService,
+
+		private readonly eventEmitter: EventEmitter2,
 	) {}
 
 	async execute(command: DeleteFeedbackCommand) {
@@ -42,5 +46,12 @@ export class DeleteFeedbackUseCase implements IUseCase<
 		)
 
 		await this.feedbackRepository.delete(feedbackToDelete)
+
+		this.eventEmitter.emit(FeedbackDeletedEvent.EVENT_NAME, {
+			props: {
+				editorId: command.currentUser.id,
+				feedbackId: feedbackToDelete.id,
+			},
+		})
 	}
 }

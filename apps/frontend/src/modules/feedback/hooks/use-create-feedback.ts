@@ -13,7 +13,7 @@ export function useCreateFeedback() {
 		mutationFn: (data: CreateFeedbackPayload) =>
 			FeedbackApi.createFeedback(data),
 
-		onSuccess: () => {
+		onSuccess: (feedback) => {
 			// 1. Invalida a lista de feedbacks (para aparecer o novo)
 			queryClient.invalidateQueries({ queryKey: ['feedbacks'] })
 
@@ -23,7 +23,7 @@ export function useCreateFeedback() {
 			toast.success('Feedback added successfully!')
 
 			// 3. Volta para a home
-			navigate({ to: '/' })
+			navigate({ to: `/feedbacks/${feedback.id}` })
 		},
 
 		onError: (error) => {

@@ -6,6 +6,9 @@ import {
 	PUB_SUB_SERVICE,
 } from 'src/shared/application/ports/pub-sub.service.interface'
 import { PubSubChannel } from 'src/shared/application/ports/pub-sub.contract'
+import { FeedbackPresenter } from '../http/presenters/feedback.presenter'
+import { FeedbackUpdatedEvent } from '../../domain/events/feedback-updated.event'
+import { FeedbackDeletedEvent } from '../../domain/events/feedback-deleted.event'
 
 @Injectable()
 export class FeedbackRedisListener {
@@ -16,9 +19,28 @@ export class FeedbackRedisListener {
 
 	@OnEvent(FeedbackCreatedEvent.EVENT_NAME, { async: true })
 	async handleFeedbackCreatedEvent(event: FeedbackCreatedEvent) {
-		await this.pubSubService.publish(
-			PubSubChannel.FEEDBACK_CREATED,
-			event.props,
-		)
+		const dto = FeedbackPresenter.toHTTP(event.props.feedback)
+		await this.pubSubService.publish(PubSubChannel.FEEDBACK_CREATED, {
+			userId: event.props.userId,
+			feedback: dto,
+		})
+	}
+
+	@OnEvent(FeedbackUpdatedEvent.EVENT_NAME, { async: true })
+	async handleFeedbackUpdatedEvent(event: FeedbackUpdatedEvent) {
+		const dto = FeedbackPresenter.toHTTP(event.props.feedback)
+		await this.pubSubService.publish(PubSubChannel.FEEDBACK_UPDATED, {
+			editorId: event.props.editorId,
+			feedbackId: event.props.feedbackId,
+			feedback: dto,
+		})
+	}
+
+	@OnEvent(FeedbackDeletedEvent.EVENT_NAME, { async: true })
+	async handleFeedbackDeletedEvent(event: FeedbackDeletedEvent) {
+		await this.pubSubService.publish(PubSubChannel.FEEDBACK_DELETED, {
+			editorId: event.props.editorId,
+			feedbackId: event.props.feedbackId,
+		})
 	}
 }

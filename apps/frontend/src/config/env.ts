@@ -8,6 +8,8 @@ const envSchema = z.object({
 		.optional()
 		.transform((val) => val === 'true'),
 
+	VITE_REALTIME_TARGET: z.string(),
+
 	MODE: z.enum(['development', 'production', 'test']).default('development'),
 	DEV: z.boolean(),
 	PROD: z.boolean(),

@@ -1,6 +1,7 @@
 import {
 	createContext,
 	useContext,
+	useEffect, // 🔥 Adicionado useEffect
 	useMemo,
 	useState,
 	type ReactNode,
@@ -9,13 +10,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { UsersApi } from '@/modules/iam/api/user.api'
 import type { User, Rule } from '@/modules/iam/types/user.schemas'
 import { storage } from '@/lib/storage'
+import { realtimeClient } from '@/lib/realtime-client' // 🔥 Importando nosso Singleton
 
 interface AuthContextType {
 	isAuthenticated: boolean
 	isLoading: boolean
 	user: User | undefined
 	rules: Rule[] | undefined
-	// 👇 Novas funções para manipular o estado
 	signIn: (token: string) => void
 	signOut: () => void
 }
@@ -35,7 +36,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	} = useQuery({
 		queryKey: ['me'],
 		queryFn: UsersApi.getMe,
-		// Só roda se tiver token no estado
 		enabled: hasToken,
 		retry: false,
 		staleTime: Infinity,
@@ -50,10 +50,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		storage.clearToken()
 		setToken(null)
 		queryClient.clear()
+		// 🔥 Desconecta o WebSocket na hora do logout por garantia (opcional, mas recomendado)
+		realtimeClient.disconnect()
 	}
 
 	const isLoading = hasToken && isQueryLoading
 	const isAuthenticated = hasToken && !isError && !!data?.user
+
+	// 🔥 O Efeito Colateral que gerencia a conexão com o Elixir
+	useEffect(() => {
+		// Só conecta se o usuário estiver de fato logado, com os dados validados pela API
+		if (isAuthenticated && token) {
+			realtimeClient.connect(token)
+		} else if (!isLoading && !isAuthenticated) {
+			// Se terminou de carregar e não está autenticado, garante a desconexão
+			realtimeClient.disconnect()
+		}
+
+		// Cleanup: Quando o AuthProvider for desmontado, fecha o túnel
+		return () => {
+			realtimeClient.disconnect()
+		}
+	}, [isAuthenticated, token, isLoading]) // 🔥 Reage a essas mudanças
 
 	const value = useMemo(
 		() => ({
@@ -64,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			signIn,
 			signOut,
 		}),
-		[isAuthenticated, isLoading, data?.user, data?.rules],
+		[isAuthenticated, isLoading, data?.user, data?.rules], // Sem dependências extras para não causar renders desnecessários
 	)
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

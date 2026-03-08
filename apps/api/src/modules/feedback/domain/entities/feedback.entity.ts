@@ -29,12 +29,12 @@ export class Feedback extends BaseEntity {
 		super({ id })
 		this.props = props
 	}
-	
+
 	static create(props: {
 		title: string
 		description: string
 		authorId: number
-		// MUDANÇA: Exigimos os objetos, não as strings
+
 		category: FeedbackCategory
 		initialStatus: FeedbackStatus
 	}): Feedback {

@@ -18,7 +18,6 @@ import {
 import { FeedbackStatusInvalidError } from '@/modules/feedback/domain/errors/feedback-status-invalid.error'
 import { FeedbackCategoryInvalidError } from '@/modules/feedback/domain/errors/feedback-category-invalid.error'
 
-import { PubSubChannel } from '@/shared/application/ports/pub-sub.contract'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { FeedbackCreatedEvent } from '@/modules/feedback/domain/events/feedback-created.event'
 
@@ -82,11 +81,8 @@ export class CreateFeedbackUseCase implements IUseCase<
 		this.eventEmitter.emit(
 			FeedbackCreatedEvent.EVENT_NAME,
 			new FeedbackCreatedEvent({
-				id: feedback.id,
-				title: feedback.title,
-				categorySlug: feedback.categorySlug,
-				statusSlug: feedback.statusSlug,
-				createdAt: feedback.createdAt,
+				userId: command.currentUser.id,
+				feedback,
 			}),
 		)
 

@@ -88,8 +88,6 @@ export class FeedbackController {
 			status: query.status,
 		})
 
-		console.log(total)
-
 		return total
 	}
 

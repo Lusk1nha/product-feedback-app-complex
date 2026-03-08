@@ -93,6 +93,22 @@ export const countFeedbacksByStatusSchema = z.object({
 	status: z.string(),
 })
 
+export const feedbackCreatedRealtimeSchema = z.object({
+	userId: z.number(),
+	feedback: feedbackSchema,
+})
+
+export const feedbackUpdatedRealtimeSchema = z.object({
+	editorId: z.number(),
+	feedbackId: z.number(),
+	feedback: feedbackSchema,
+})
+
+export const feedbackDeletedRealtimeSchema = z.object({
+	editorId: z.number(),
+	feedbackId: z.number(),
+})
+
 export type ListFeedbacksPayload = z.infer<typeof listFeedbacksSchema>
 export type CountFeedbacksByStatusPayload = z.infer<
 	typeof countFeedbacksByStatusSchema
@@ -103,5 +119,15 @@ export type FeedbackStatus = z.infer<typeof feedbackStatusSchema>
 
 export type CreateFeedbackPayload = z.infer<typeof createFeedbackSchema>
 export type UpdateFeedbackPayload = z.infer<typeof updateFeedbackSchema>
+
+export type FeedbackCreatedRealtimePayload = z.infer<
+	typeof feedbackCreatedRealtimeSchema
+>
+export type FeedbackUpdatedRealtimePayload = z.infer<
+	typeof feedbackUpdatedRealtimeSchema
+>
+export type FeedbackDeletedRealtimePayload = z.infer<
+	typeof feedbackDeletedRealtimeSchema
+>
 
 export type Feedback = z.infer<typeof feedbackSchema>

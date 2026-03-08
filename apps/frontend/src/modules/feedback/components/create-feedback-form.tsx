@@ -15,8 +15,8 @@ import { useCreateFeedback } from '@/modules/feedback/hooks/use-create-feedback'
 import {
 	createFeedbackSchema,
 	type CreateFeedbackPayload,
-	type MetadataResponse,
 } from '@/modules/feedback/types/feedback.schema'
+import type { MetadataResponse } from '@/modules/feedback/types/metadata.schema'
 
 interface CreateFeedbackFormProps {
 	metadata: MetadataResponse

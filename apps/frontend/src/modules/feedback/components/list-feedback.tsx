@@ -10,6 +10,7 @@ import { FeedbackCard } from './feedback-card'
 import { useNavigate } from '@tanstack/react-router'
 import { NotFoundIcon } from '@/components/common/icons/not-found-icon'
 import { AddFeedbackRedirectButton } from '@/components/common/buttons/add-feedback-redirect-button'
+import { useSyncFeedbacks } from '../hooks/use-sync-feedbacks'
 
 interface ListFeedbackProps {
 	category: string
@@ -17,6 +18,12 @@ interface ListFeedbackProps {
 }
 
 export function ListFeedback({ category, sort }: Readonly<ListFeedbackProps>) {
+	const activeFilters = {
+		status: 'suggestion',
+		category,
+		sort,
+	}
+
 	const {
 		data,
 		isLoading: isFeedbacksLoading,
@@ -24,7 +31,10 @@ export function ListFeedback({ category, sort }: Readonly<ListFeedbackProps>) {
 		fetchNextPage,
 		hasNextPage,
 		isFetchingNextPage,
-	} = useInfiniteFeedbacks({ status: 'suggestion', category, sort })
+		// 2. Passe o objeto completo aqui
+	} = useInfiniteFeedbacks(activeFilters)
+
+	useSyncFeedbacks(activeFilters)
 
 	const { data: metadata, isLoading: isMetadataLoading } = useAppMetadata()
 	const navigate = useNavigate()

@@ -1,9 +1,4 @@
-import {
-	Inject,
-	Injectable,
-	BadRequestException,
-	NotFoundException,
-} from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { IUseCase } from 'src/shared/application/interfaces/use-case.interface'
 import { User } from 'src/modules/iam/domain/entities/user.entity'
 import { Action } from 'src/modules/iam/infrastructure/types/permission.types'
@@ -28,6 +23,8 @@ import { FeedbackStatus } from '../../../domain/entities/reference/feedback-stat
 import { FeedbackCategory } from '../../../domain/entities/reference/feedback-category.entity'
 import { FeedbackCategoryInvalidError } from '@/modules/feedback/domain/errors/feedback-category-invalid.error'
 import { FeedbackStatusInvalidError } from '@/modules/feedback/domain/errors/feedback-status-invalid.error'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { FeedbackUpdatedEvent } from '@/modules/feedback/domain/events/feedback-updated.event'
 
 export interface UpdateFeedbackCommand {
 	targetFeedbackId: number
@@ -54,6 +51,8 @@ export class UpdateFeedbackUseCase implements IUseCase<
 
 		@Inject(PERMISSION_SERVICE)
 		private readonly permissionService: IPermissionService,
+
+		private readonly eventEmitter: EventEmitter2,
 	) {}
 
 	async execute(command: UpdateFeedbackCommand): Promise<Feedback> {
@@ -78,7 +77,18 @@ export class UpdateFeedbackUseCase implements IUseCase<
 			newStatus,
 		})
 
-		return await this.feedbackRepository.update(feedback)
+		const updatedFeedback = await this.feedbackRepository.update(feedback)
+
+		this.eventEmitter.emit(
+			FeedbackUpdatedEvent.EVENT_NAME,
+			new FeedbackUpdatedEvent({
+				editorId: currentUser.id,
+				feedbackId: targetFeedbackId,
+				feedback: updatedFeedback,
+			}),
+		)
+
+		return updatedFeedback
 	}
 
 	/**

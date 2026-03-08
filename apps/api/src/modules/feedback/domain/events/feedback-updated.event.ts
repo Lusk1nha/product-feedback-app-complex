@@ -1,11 +1,12 @@
 import { Feedback } from '../entities/feedback.entity'
 
-export class FeedbackCreatedEvent {
-	static readonly EVENT_NAME = 'feedback.created'
+export class FeedbackUpdatedEvent {
+	static readonly EVENT_NAME = 'feedback.updated'
 
 	constructor(
 		public readonly props: {
-			userId: number
+			editorId: number
+			feedbackId: number
 			feedback: Feedback
 		},
 	) {}

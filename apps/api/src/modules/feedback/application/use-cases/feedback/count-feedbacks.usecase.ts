@@ -22,8 +22,6 @@ export class CountFeedbacksUseCase implements IUseCase<
 	) {}
 
 	async execute(command: CountFeedbacksCommand): Promise<number> {
-		console.log(command)
-
 		return await this.feedbackRepository.countByStatus(command.status)
 	}
 }

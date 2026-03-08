@@ -30,8 +30,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter'
 			validate,
 		}),
 
-		EventEmitterModule.forRoot(),
-
 		// 2. Throttling (Rate Limiting) Assíncrono
 		ThrottlerModule.forRootAsync({
 			imports: [ConfigModule],
@@ -57,45 +55,50 @@ import { EventEmitterModule } from '@nestjs/event-emitter'
 
 				return {
 					pinoHttp: {
-						// 👇 AQUI COMEÇA A MÁGICA DO TRACING
 						genReqId: (req, res) => {
-							const existingID = req.id ?? req.headers['x-request-id']
-							if (existingID) return existingID
-
-							const id = randomUUID()
-							res.setHeader('X-Request-Id', id) // Devolve no header para o Frontend saber
+							const id = req.headers['x-request-id'] || randomUUID()
+							res.setHeader('X-Request-Id', id)
 							return id
 						},
-						// 👆 FIM DA MÁGICA
 
-						customProps: (req, res) => ({
-							context: 'HTTP',
-						}),
+						autoLogging: true,
+						quietReqLogger: true,
+
+						serializers: {
+							req: (req) => ({
+								method: req.method,
+								url: req.url,
+								id: req.id,
+							}),
+							res: (res) => ({
+								statusCode: res.statusCode,
+							}),
+							err: (err) => err,
+						},
+
+						customSuccessMessage: (req, res) => {
+							return `${req.method} ${req.url} completed with status ${res.statusCode}`
+						},
+
 						transport: !isProduction
 							? {
 									target: 'pino-pretty',
 									options: {
 										singleLine: true,
 										colorize: true,
-										translateTime: 'SYS:standard',
-										ignore: 'pid,hostname', // Deixa o log mais limpo em dev
+										translateTime: 'SYS:HH:MM:ss',
+										ignore: 'pid,hostname,reqId,res',
 									},
 								}
 							: undefined,
-						redact: {
-							paths: [
-								'req.headers.authorization',
-								'req.body.password',
-								'req.body.confirmPassword',
-							],
-							remove: true,
-						},
-						// Em produção 'info' é bom, mas 'warn' economiza mais disco se tiver muito tráfego
+
 						level: isProduction ? 'info' : 'debug',
 					},
 				}
 			},
 		}),
+
+		EventEmitterModule.forRoot(),
 
 		// 4. Módulos de Domínio e Infraestrutura
 		DatabaseModule,

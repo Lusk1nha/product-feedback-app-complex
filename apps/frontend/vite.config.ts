@@ -1,19 +1,20 @@
 /// <reference types="vitest" />
-import { defineConfig, loadEnv } from 'vite' // <--- Importe loadEnv
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import path from 'path'
 
-// Transforme em uma função que recebe { mode }
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd(), '')
 
-	// Fallback para localhost se a variável não existir
+	// Fallbacks para localhost se as variáveis não existirem no .env
 	const apiTarget = env.VITE_API_TARGET || 'http://localhost:3000'
+	const realtimeTarget = env.VITE_REALTIME_TARGET || 'http://localhost:4000'
 
 	console.log('-------------------------------------------')
-	console.log('🔧 VITE PROXY TARGET:', apiTarget)
+	console.log('🔧 VITE PROXY TARGET (API):', apiTarget)
+	console.log('⚡ VITE PROXY TARGET (WS):', realtimeTarget)
 	console.log('-------------------------------------------')
 
 	return {
@@ -31,8 +32,16 @@ export default defineConfig(({ mode }) => {
 			host: true,
 			port: 5173,
 			proxy: {
+				// Rotas da API normal (Node.js)
 				'/api': {
-					target: apiTarget, // <--- Se aqui chegar '/api', o erro acontece
+					target: apiTarget,
+					changeOrigin: true,
+					secure: false,
+				},
+				// Rotas do WebSocket (Elixir Phoenix)
+				'/socket': {
+					target: realtimeTarget,
+					ws: true, // Isso aqui já faz a mágica de HTTP -> WS
 					changeOrigin: true,
 					secure: false,
 				},
@@ -42,7 +51,7 @@ export default defineConfig(({ mode }) => {
 			globals: true,
 			environment: 'jsdom',
 			setupFiles: './src/test/setup.ts',
-			css: true, // Importante para Tailwind v4 ser processado nos testes
+			css: true,
 		},
 	}
 })
