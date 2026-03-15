@@ -20,10 +20,17 @@ import { GetRoadmapDataUseCase } from './application/use-cases/feedback/get-road
 import { RoadmapController } from './infrastructure/http/controllers/roadmap.controller'
 import { CountFeedbacksUseCase } from './application/use-cases/feedback/count-feedbacks.usecase'
 import { FeedbackRedisListener } from './infrastructure/listeners/feedback-redis.listener'
+import { ToggleFeedbackUpvoteUseCase } from './application/use-cases/feedback/toggle-feedback-upvote.usecase'
+import { COMMENT_REPOSITORY } from './domain/repositories/comment.repository.interface'
+import { CommentDrizzleRepository } from './infrastructure/repositories/comment.drizzle.repository'
+import { CreateCommentUseCase } from './application/use-cases/comment/create-comment.usecase'
+import { ListFeedbackCommentsUseCase } from './application/use-cases/comment/list-feedback-comments.usecase'
+import { ToggleCommentUpvoteUseCase } from './application/use-cases/comment/toggle-comment-upvote.usecase'
+import { CommentController } from './infrastructure/http/controllers/comment.controller'
 
 @Module({
 	imports: [CacheModule.register({ ttl: 60000 })],
-	controllers: [FeedbackController, MetadataController, RoadmapController],
+	controllers: [FeedbackController, CommentController, MetadataController, RoadmapController],
 	providers: [
 		// 1. Repositories (Binding Interface -> Implementation)
 		{
@@ -36,22 +43,35 @@ import { FeedbackRedisListener } from './infrastructure/listeners/feedback-redis
 			useClass: FeedbackDrizzleRepository,
 		},
 
+		{
+			provide: COMMENT_REPOSITORY, // <-- Repositório de Comentários
+			useClass: CommentDrizzleRepository,
+		},
+
 		{ provide: PERMISSION_SERVICE, useClass: CaslPermissionService },
 
-		// 2. Use Cases
-		GetAppMetadataUseCase,
-		GetRoadmapStatsUseCase,
-		GetRoadmapDataUseCase,
-
-		ListFeedbacksUseCase,
-		CountFeedbacksUseCase,
-		GetFeedbackByIdUseCase,
+		// Feedback Use Cases
 		CreateFeedbackUseCase,
+		GetFeedbackByIdUseCase,
 		UpdateFeedbackUseCase,
 		DeleteFeedbackUseCase,
+		ListFeedbacksUseCase,
+		CountFeedbacksUseCase,
+		ToggleFeedbackUpvoteUseCase,
+		GetRoadmapDataUseCase,
+		GetRoadmapStatsUseCase,
 
+		// Comment Use Cases <-- Registrados aqui!
+		CreateCommentUseCase,
+		ListFeedbackCommentsUseCase,
+		ToggleCommentUpvoteUseCase,
+
+		// Metadata Use Cases
+		GetAppMetadataUseCase,
+
+		// Listeners
 		FeedbackRedisListener,
 	],
-	exports: [METADATA_REPOSITORY, FEEDBACK_REPOSITORY],
+	exports: [METADATA_REPOSITORY, FEEDBACK_REPOSITORY, COMMENT_REPOSITORY],
 })
 export class FeedbackModule {}

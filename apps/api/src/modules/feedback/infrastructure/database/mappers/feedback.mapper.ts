@@ -5,7 +5,7 @@ type FeedbackSelect = typeof feedbacks.$inferSelect
 type FeedbackInsert = typeof feedbacks.$inferInsert
 
 export class FeedbackMapper {
-	static toDomain(raw: FeedbackSelect): Feedback {
+	static toDomain(raw: FeedbackSelect & { hasUpvoted?: boolean }): Feedback {
 		return Feedback.rebuild(
 			{
 				title: raw.title,
@@ -14,6 +14,7 @@ export class FeedbackMapper {
 				categorySlug: raw.categorySlug,
 				statusSlug: raw.statusSlug,
 				upvotesCount: raw.upvotesCount,
+				hasUpvoted: raw.hasUpvoted,
 				enabled: raw.enabled,
 				createdAt: raw.createdAt,
 				updatedAt: raw.updatedAt,

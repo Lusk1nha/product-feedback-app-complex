@@ -15,8 +15,8 @@ import {
 	IMetadataRepository,
 	METADATA_REPOSITORY,
 } from '@/modules/feedback/domain/repositories/metadata.repository.interface'
-import { FeedbackStatusInvalidError } from '@/modules/feedback/domain/errors/feedback-status-invalid.error'
-import { FeedbackCategoryInvalidError } from '@/modules/feedback/domain/errors/feedback-category-invalid.error'
+import { FeedbackStatusInvalidError } from '@/modules/feedback/domain/errors/feedback/feedback-status-invalid.error'
+import { FeedbackCategoryInvalidError } from '@/modules/feedback/domain/errors/feedback/feedback-category-invalid.error'
 
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { FeedbackCreatedEvent } from '@/modules/feedback/domain/events/feedback-created.event'

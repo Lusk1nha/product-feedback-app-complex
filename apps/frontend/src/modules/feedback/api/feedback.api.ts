@@ -1,9 +1,11 @@
 import { httpClient } from '@/lib/api-client'
 import {
 	feedbackSchema,
+	feedbackUpvoteResponseSchema,
 	type CountFeedbacksByStatusPayload,
 	type CreateFeedbackPayload,
 	type Feedback,
+	type FeedbackUpvoteResponse,
 	type ListFeedbacksPayload,
 	type UpdateFeedbackPayload,
 } from '../types/feedback.schema'
@@ -52,6 +54,13 @@ export const FeedbackApi = {
 		return feedbackSchema.parse(response)
 	},
 
+	toggleUpvote: async (id: number) => {
+		const response = await httpClient.post<FeedbackUpvoteResponse>(
+			`/feedbacks/${id}/upvote`,
+		)
+		return feedbackUpvoteResponseSchema.parse(response)
+	},
+	
 	deleteFeedback: async (id: number) => {
 		await httpClient.delete(`/feedbacks/${id}`)
 	},

@@ -53,6 +53,7 @@ export class ListFeedbacksUseCase implements IUseCase<
 			sort: command.sort,
 			page: command.page || 1, // Default seguro
 			perPage: command.perPage || 10, // Default seguro
+			userId: currentUser.id,
 		})
 	}
 }

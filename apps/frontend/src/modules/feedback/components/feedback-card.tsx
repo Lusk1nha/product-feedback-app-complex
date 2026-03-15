@@ -3,6 +3,8 @@ import { motion } from 'motion/react'
 import { cn } from '@/lib/utils'
 import type { Feedback, FeedbackCategory } from '../types/feedback.schema'
 
+import { useToggleFeedbackUpvote } from '../hooks/use-toggle-feedback-upvote'
+
 interface FeedbackCardProps {
 	feedback: Feedback
 	categories?: FeedbackCategory[]
@@ -14,6 +16,13 @@ export function FeedbackCard({
 	categories,
 	onClick,
 }: FeedbackCardProps) {
+	const { mutate: toggleUpvote, isPending } = useToggleFeedbackUpvote()
+
+	const handleUpvote = (e: React.MouseEvent) => {
+		e.stopPropagation()
+		toggleUpvote(feedback.id)
+	}
+
 	const categoryLabel =
 		categories?.find((c) => c.slug === feedback.categorySlug)?.label ??
 		feedback.categorySlug
@@ -35,6 +44,8 @@ export function FeedbackCard({
 				<UpvoteButton
 					count={feedback.upvotesCount}
 					isActive={feedback.isUpvoted}
+					onClick={handleUpvote}
+					disabled={isPending}
 				/>
 			</div>
 
@@ -61,6 +72,8 @@ export function FeedbackCard({
 					count={feedback.upvotesCount}
 					isActive={feedback.isUpvoted}
 					orientation="horizontal"
+					onClick={handleUpvote}
+					disabled={isPending}
 				/>
 				<CommentIndicator count={commentsCount} />
 			</div>
@@ -79,25 +92,31 @@ function UpvoteButton({
 	count,
 	isActive,
 	orientation = 'vertical',
+	onClick,
+	disabled,
 }: {
 	count: number
 	isActive?: boolean
 	orientation?: 'vertical' | 'horizontal'
+	onClick: (e: React.MouseEvent) => void
+	disabled?: boolean
 }) {
 	return (
 		<button
 			onClick={(e) => {
 				e.stopPropagation()
-				// TODO: Implementar lógica de toggle
+				onClick(e)
 			}}
 			className={cn(
 				'flex items-center justify-between rounded-lg transition-colors',
-				'bg-brand-light hover:bg-[#CFD7FF] active:bg-brand-blue', // Usei hex do hover pois não tem var específica, mas active usa brand-blue
+				'bg-brand-light hover:bg-[#CFD7FF] active:bg-brand-blue',
 				isActive ? 'bg-brand-blue text-white' : 'text-brand-dark',
 				orientation === 'vertical'
 					? 'h-[53px] w-10 flex-col p-2'
 					: 'h-8 flex-row gap-2.5 px-4 py-1.5',
+				disabled && 'opacity-50 cursor-not-allowed',
 			)}
+			disabled={disabled}
 		>
 			<ChevronUp
 				className={cn(

@@ -7,10 +7,10 @@ export const FEEDBACK_REPOSITORY = Symbol('FEEDBACK_REPOSITORY')
 export interface FindFeedbacksParams {
 	categorySlug?: string
 	statusSlug?: string
-
 	sort?: FeedbackSort
 	page: number
 	perPage: number
+	userId?: number
 }
 
 export interface IFeedbackRepository {
@@ -21,9 +21,14 @@ export interface IFeedbackRepository {
 	countByStatus(status: string): Promise<number>
 	countByAggregatedStatus(): Promise<Record<string, number>>
 
-	findById(id: number): Promise<Feedback | null>
-	findByIdOrThrow(id: number): Promise<Feedback>
+	findById(id: number, userId?: number): Promise<Feedback | null>
+	findByIdOrThrow(id: number, userId?: number): Promise<Feedback>
 
 	findAll(params: FindFeedbacksParams): Promise<PaginatedResult<Feedback>>
 	findAllByStatusSlug(statusSlug: string): Promise<Feedback[]>
+
+	toggleUpvote(
+		feedbackId: number,
+		userId: number,
+	): Promise<{ hasUpvoted: boolean; upvotesCount: number }>
 }

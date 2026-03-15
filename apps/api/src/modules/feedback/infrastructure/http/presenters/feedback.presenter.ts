@@ -38,6 +38,14 @@ export class FeedbackResponse {
 	updatedAt: Date
 }
 
+export class FeedbackUpvoteResponse {
+	@ApiProperty({ example: true })
+	hasUpvoted: boolean
+
+	@ApiProperty({ example: 10 })
+	upvotesCount: number
+}
+
 export class FeedbackPresenter {
 	static toHTTP(feedback: Feedback): FeedbackResponse {
 		return {
@@ -55,6 +63,16 @@ export class FeedbackPresenter {
 			authorId: Number(feedback.authorId),
 			createdAt: feedback.createdAt,
 			updatedAt: feedback.updatedAt,
+		}
+	}
+
+	static toUpvoteHTTP(result: {
+		hasUpvoted: boolean
+		upvotesCount: number
+	}): FeedbackUpvoteResponse {
+		return {
+			hasUpvoted: result.hasUpvoted,
+			upvotesCount: result.upvotesCount,
 		}
 	}
 }

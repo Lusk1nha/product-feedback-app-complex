@@ -109,6 +109,18 @@ export const feedbackDeletedRealtimeSchema = z.object({
 	feedbackId: z.number(),
 })
 
+export const feedbackUpvotedRealtimeSchema = z.object({
+	userId: z.number(),
+	feedback: feedbackSchema,
+	hasUpvoted: z.boolean(),
+	upvotesCount: z.number(),
+})
+
+export const feedbackUpvoteResponseSchema = z.object({
+	hasUpvoted: z.boolean(),
+	upvotesCount: z.number(),
+})
+
 export type ListFeedbacksPayload = z.infer<typeof listFeedbacksSchema>
 export type CountFeedbacksByStatusPayload = z.infer<
 	typeof countFeedbacksByStatusSchema
@@ -123,11 +135,21 @@ export type UpdateFeedbackPayload = z.infer<typeof updateFeedbackSchema>
 export type FeedbackCreatedRealtimePayload = z.infer<
 	typeof feedbackCreatedRealtimeSchema
 >
+
 export type FeedbackUpdatedRealtimePayload = z.infer<
 	typeof feedbackUpdatedRealtimeSchema
 >
+
 export type FeedbackDeletedRealtimePayload = z.infer<
 	typeof feedbackDeletedRealtimeSchema
+>
+
+export type FeedbackUpvotedRealtimePayload = z.infer<
+	typeof feedbackUpvotedRealtimeSchema
+>
+
+export type FeedbackUpvoteResponse = z.infer<
+	typeof feedbackUpvoteResponseSchema
 >
 
 export type Feedback = z.infer<typeof feedbackSchema>

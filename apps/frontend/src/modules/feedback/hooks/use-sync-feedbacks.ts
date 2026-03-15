@@ -6,6 +6,7 @@ import {
 	type FeedbackCreatedRealtimePayload,
 	type FeedbackDeletedRealtimePayload,
 	type FeedbackUpdatedRealtimePayload,
+	type FeedbackUpvotedRealtimePayload,
 } from '../types/feedback.schema'
 
 export function useSyncFeedbacks(activeFilters: any) {
@@ -57,6 +58,32 @@ export function useSyncFeedbacks(activeFilters: any) {
 						...page,
 						data: page.data.map((item: Feedback) =>
 							item.id === payload.feedbackId ? updatedFeedback : item,
+						),
+					}))
+
+					return { ...oldData, pages: newPages }
+				},
+			)
+		},
+	)
+
+	// --- LISTENER 2.5: UPVOTE ---
+	useRealtimeSubscription<FeedbackUpvotedRealtimePayload>(
+		'feedbacks:list',
+		'feedback_upvote_toggled',
+		(payload: FeedbackUpvotedRealtimePayload) => {
+			const updatedFeedback = feedbackSchema.parse(payload.feedback)
+
+			queryClient.setQueryData(
+				['feedbacks', 'infinite', activeFilters],
+				(oldData: any) => {
+					if (!oldData || !oldData.pages) return oldData
+
+					// Percorre todas as páginas e substitui apenas o card que foi editado
+					const newPages = oldData.pages.map((page: any) => ({
+						...page,
+						data: page.data.map((item: Feedback) =>
+							item.id === payload.feedback.id ? updatedFeedback : item,
 						),
 					}))
 

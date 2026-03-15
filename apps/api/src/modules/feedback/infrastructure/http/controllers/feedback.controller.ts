@@ -17,6 +17,7 @@ import { Auth } from 'src/shared/infrastructure/http/decorators/auth.decorator'
 import {
 	FeedbackPresenter,
 	FeedbackResponse,
+	FeedbackUpvoteResponse,
 } from '../presenters/feedback.presenter'
 import { CreateFeedbackDto } from '../dtos/feedback/create-feedback.dto'
 import { User } from 'src/modules/iam/domain/entities/user.entity'
@@ -32,6 +33,7 @@ import { ListFeedbacksUseCase } from 'src/modules/feedback/application/use-cases
 import { toCollection } from 'src/shared/interface/http/presenters/collection.presenter'
 import { CountFeedbacksDto } from '../dtos/feedback/count-feedbacks.dto'
 import { CountFeedbacksUseCase } from '@/modules/feedback/application/use-cases/feedback/count-feedbacks.usecase'
+import { ToggleFeedbackUpvoteUseCase } from '@/modules/feedback/application/use-cases/feedback/toggle-feedback-upvote.usecase'
 
 @ApiTags('Feedbacks')
 @Controller('feedbacks')
@@ -44,6 +46,7 @@ export class FeedbackController {
 
 		private readonly createFeedbackUseCase: CreateFeedbackUseCase,
 		private readonly updateFeedbackUseCase: UpdateFeedbackUseCase,
+		private readonly toggleFeedbackUpvoteUseCase: ToggleFeedbackUpvoteUseCase,
 		private readonly deleteFeedbackUseCase: DeleteFeedbackUseCase,
 	) {}
 
@@ -174,5 +177,25 @@ export class FeedbackController {
 		})
 
 		return toCollection(result, FeedbackPresenter.toHTTP)
+	}
+
+	@ApiOperation({ summary: 'Toggle upvote on a feedback' })
+	@ApiResponse({
+		status: HttpStatus.OK,
+		description: 'The updated upvote state and count',
+		type: FeedbackUpvoteResponse,
+	})
+	@Post(':id/upvote')
+	@HttpCode(HttpStatus.OK)
+	async toggleUpvote(
+		@Param('id', ParseIntPipe) id: number,
+		@CurrentUser() currentUser: User,
+	) {
+		const result = await this.toggleFeedbackUpvoteUseCase.execute({
+			feedbackId: id,
+			currentUser,
+		})
+
+		return FeedbackPresenter.toUpvoteHTTP(result)
 	}
 }

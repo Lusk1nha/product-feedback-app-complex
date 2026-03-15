@@ -10,7 +10,7 @@ import {
 } from '../../domain/repositories/feedback.repository.interface'
 import { Feedback } from '../../domain/entities/feedback.entity'
 import { FeedbackMapper } from '../database/mappers/feedback.mapper'
-import { FeedbackNotFoundError } from '../../domain/errors/feedback-not-found.error'
+import { FeedbackNotFoundError } from '../../domain/errors/feedback/feedback-not-found.error'
 import { FeedbackSort } from '../../domain/enums/feedback-sort.enum'
 import { PaginatedResult } from 'src/shared/application/interfaces/paginated-result.interface'
 
@@ -52,17 +52,35 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 			.where(eq(schema.feedbacks.id, feedback.id))
 	}
 
-	async findById(id: number): Promise<Feedback | null> {
-		const result = await this.db.query.feedbacks.findFirst({
-			where: eq(schema.feedbacks.id, id),
-		})
+	async findById(id: number, userId?: number): Promise<Feedback | null> {
+		const [row] = await this.db
+			.select({
+				feedback: schema.feedbacks,
+				hasUpvoted:
+					sql<boolean>`CASE WHEN ${schema.upvotes.userId} IS NOT NULL THEN true ELSE false END`.as(
+						'has_upvoted',
+					),
+			})
+			.from(schema.feedbacks)
+			.leftJoin(
+				schema.upvotes,
+				and(
+					eq(schema.upvotes.feedbackId, schema.feedbacks.id),
+					eq(schema.upvotes.userId, userId ?? 0),
+				),
+			)
+			.where(eq(schema.feedbacks.id, id))
 
-		if (!result) return null
-		return FeedbackMapper.toDomain(result)
+		if (!row) return null
+
+		return FeedbackMapper.toDomain({
+			...row.feedback,
+			hasUpvoted: row.hasUpvoted,
+		})
 	}
 
-	async findByIdOrThrow(id: number): Promise<Feedback> {
-		const result = await this.findById(id)
+	async findByIdOrThrow(id: number, userId?: number): Promise<Feedback> {
+		const result = await this.findById(id, userId)
 		if (!result) throw new FeedbackNotFoundError()
 		return result
 	}
@@ -70,7 +88,7 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 	async findAll(
 		params: FindFeedbacksParams,
 	): Promise<PaginatedResult<Feedback>> {
-		const { categorySlug, statusSlug, sort, page, perPage } = params
+		const { categorySlug, statusSlug, sort, page, perPage, userId } = params
 
 		// Filtros base
 		const filters: SQL[] = [eq(schema.feedbacks.enabled, true)]
@@ -116,8 +134,23 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 		const [dataRaw, countResult] = await Promise.all([
 			// 1. Busca os dados paginados
 			this.db
-				.select()
+				.select({
+					feedback: schema.feedbacks,
+					// Retorna true se encontrou o registro na tabela de upvotes, false caso contrário
+					hasUpvoted:
+						sql<boolean>`CASE WHEN ${schema.upvotes.userId} IS NOT NULL THEN true ELSE false END`.as(
+							'has_upvoted',
+						),
+				})
 				.from(schema.feedbacks)
+				.leftJoin(
+					schema.upvotes,
+					and(
+						eq(schema.upvotes.feedbackId, schema.feedbacks.id),
+						// O coalesce para 0 garante que a query não quebre caso userId seja undefined
+						eq(schema.upvotes.userId, userId ?? 0),
+					),
+				)
 				.where(and(...filters))
 				.orderBy(orderByClause)
 				.limit(perPage)
@@ -136,13 +169,13 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 		const lastPage = Math.ceil(total / perPage)
 
 		return {
-			data: dataRaw.map(FeedbackMapper.toDomain),
-			meta: {
-				page,
-				perPage,
-				total,
-				lastPage,
-			},
+			data: dataRaw.map((row) =>
+				FeedbackMapper.toDomain({
+					...row.feedback,
+					hasUpvoted: row.hasUpvoted,
+				}),
+			),
+			meta: { page, perPage, total, lastPage },
 		}
 	}
 
@@ -193,5 +226,55 @@ export class FeedbackDrizzleRepository implements IFeedbackRepository {
 			)
 
 		return result[0].count
+	}
+
+	async toggleUpvote(
+		feedbackId: number,
+		userId: number,
+	): Promise<{ hasUpvoted: boolean; upvotesCount: number }> {
+		return await this.db.transaction(async (tx) => {
+			const [deletedVote] = await tx
+				.delete(schema.upvotes)
+				.where(
+					and(
+						eq(schema.upvotes.feedbackId, feedbackId),
+						eq(schema.upvotes.userId, userId),
+					),
+				)
+				.returning()
+
+			if (deletedVote) {
+				const [updated] = await tx
+					.update(schema.feedbacks)
+					.set({ upvotesCount: sql`${schema.feedbacks.upvotesCount} - 1` })
+					.where(eq(schema.feedbacks.id, feedbackId))
+					.returning({ upvotesCount: schema.feedbacks.upvotesCount })
+
+				return { hasUpvoted: false, upvotesCount: updated.upvotesCount }
+			}
+
+			const [insertedVote] = await tx
+				.insert(schema.upvotes)
+				.values({ feedbackId, userId })
+				.onConflictDoNothing()
+				.returning()
+
+			if (insertedVote) {
+				const [updated] = await tx
+					.update(schema.feedbacks)
+					.set({ upvotesCount: sql`${schema.feedbacks.upvotesCount} + 1` })
+					.where(eq(schema.feedbacks.id, feedbackId))
+					.returning({ upvotesCount: schema.feedbacks.upvotesCount })
+
+				return { hasUpvoted: true, upvotesCount: updated.upvotesCount }
+			}
+
+			const [current] = await tx
+				.select({ upvotesCount: schema.feedbacks.upvotesCount })
+				.from(schema.feedbacks)
+				.where(eq(schema.feedbacks.id, feedbackId))
+
+			return { hasUpvoted: true, upvotesCount: current.upvotesCount }
+		})
 	}
 }

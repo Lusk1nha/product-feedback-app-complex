@@ -31,13 +31,10 @@ export class GetFeedbackByIdUseCase implements IUseCase<
 	) {}
 
 	async execute(command: GetFeedbackByIdCommand): Promise<Feedback> {
-		this.permissionService.ensureCan(
-			command.currentUser,
-			Action.Read,
-			'Feedback',
-		)
+		const { id, currentUser } = command
 
-		const feedback = await this.feedbackRepository.findByIdOrThrow(command.id)
-		return feedback
+		this.permissionService.ensureCan(currentUser, Action.Read, 'Feedback')
+
+		return await this.feedbackRepository.findByIdOrThrow(id, currentUser.id)
 	}
 }

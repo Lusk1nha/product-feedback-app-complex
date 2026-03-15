@@ -34,6 +34,9 @@ defmodule Realtime.RedisConsumer do
       {:message, %{channel: "feedback:updated", payload: payload}} ->
         process_message(payload, "update_feedback")
 
+      {:message, %{channel: "feedback:upvote:toggled", payload: payload}} ->
+        process_message(payload, "feedback_upvote_toggled")
+
       # 5. MATCH PARA DELEÇÃO
       {:message, %{channel: "feedback:deleted", payload: payload}} ->
         process_message(payload, "delete_feedback")

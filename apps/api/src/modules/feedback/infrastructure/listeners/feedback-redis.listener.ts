@@ -9,6 +9,7 @@ import { PubSubChannel } from 'src/shared/application/ports/pub-sub.contract'
 import { FeedbackPresenter } from '../http/presenters/feedback.presenter'
 import { FeedbackUpdatedEvent } from '../../domain/events/feedback-updated.event'
 import { FeedbackDeletedEvent } from '../../domain/events/feedback-deleted.event'
+import { FeedbackUpvoteToggledEvent } from '../../domain/events/feedback-upvote-toggled.event'
 
 @Injectable()
 export class FeedbackRedisListener {
@@ -33,6 +34,19 @@ export class FeedbackRedisListener {
 			editorId: event.props.editorId,
 			feedbackId: event.props.feedbackId,
 			feedback: dto,
+		})
+	}
+
+	@OnEvent(FeedbackUpvoteToggledEvent.EVENT_NAME, { async: true })
+	async handleFeedbackUpvoteToggledEvent(event: FeedbackUpvoteToggledEvent) {
+		const dto = FeedbackPresenter.toHTTP(event.props.feedback)
+
+		await this.pubSubService.publish(PubSubChannel.FEEDBACK_UPVOTE_TOGGLED, {
+			userId: event.props.userId,
+			feedback: dto,
+
+			hasUpvoted: event.props.hasUpvoted,
+			upvotesCount: event.props.upvotesCount,
 		})
 	}
 

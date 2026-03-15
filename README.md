@@ -37,7 +37,19 @@ O código é organizado em módulos desacoplados, com limites claros entre camad
 
 ---
 
-## 🛠️ Stack Tecnológica
+## 🛠️ Stack Tecnológica (Frontend)
+
+- **Runtime:** Node.js
+- **Framework:** Vite + React
+- **Linguagem:** TypeScript
+- **Banco de Dados:** PostgreSQL
+- **ORM:** Drizzle ORM (Type-safe SQL)
+- **Validação:** Zod & Class-Validator
+- **Testes:** Jest & Supertest (E2E e Unitários)
+- **Docs:** Scalar (Swagger)
+- **Container:** Docker & Docker Compose
+
+## 🛠️ Stack Tecnológica (Api)
 
 - **Runtime:** Node.js
 - **Framework:** NestJS 11
@@ -47,6 +59,15 @@ O código é organizado em módulos desacoplados, com limites claros entre camad
 - **Validação:** Zod & Class-Validator
 - **Testes:** Jest & Supertest (E2E e Unitários)
 - **Docs:** Scalar (Swagger)
+- **Container:** Docker & Docker Compose
+
+## 🛠️ Stack Tecnológica (Realtime)
+
+- **Runtime:** Elixir
+- **Framework:** Phoenix
+- **Linguagem:** Elixir
+- **Banco de Dados:** PostgreSQL
+- **Testes:** ExUnit
 - **Container:** Docker & Docker Compose
 
 ---

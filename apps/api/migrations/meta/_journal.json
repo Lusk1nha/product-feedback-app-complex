@@ -106,6 +106,13 @@
       "when": 1767494747755,
       "tag": "0014_pale_jetstream",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1773604033355,
+      "tag": "0015_classy_power_man",
+      "breakpoints": true
     }
   ]
 }

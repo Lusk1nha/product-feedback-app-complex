@@ -21,8 +21,8 @@ import {
 import { Feedback } from '../../../domain/entities/feedback.entity'
 import { FeedbackStatus } from '../../../domain/entities/reference/feedback-status.entity'
 import { FeedbackCategory } from '../../../domain/entities/reference/feedback-category.entity'
-import { FeedbackCategoryInvalidError } from '@/modules/feedback/domain/errors/feedback-category-invalid.error'
-import { FeedbackStatusInvalidError } from '@/modules/feedback/domain/errors/feedback-status-invalid.error'
+import { FeedbackCategoryInvalidError } from '@/modules/feedback/domain/errors/feedback/feedback-category-invalid.error'
+import { FeedbackStatusInvalidError } from '@/modules/feedback/domain/errors/feedback/feedback-status-invalid.error'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { FeedbackUpdatedEvent } from '@/modules/feedback/domain/events/feedback-updated.event'
 

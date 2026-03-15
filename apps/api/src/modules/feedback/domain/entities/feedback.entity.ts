@@ -1,10 +1,10 @@
 import { BaseEntity } from 'src/shared/domain/entities/base.entity'
-import { FeedbackTitleTooShortError } from '../errors/feedback-title-too-short.error'
-import { FeedbackDescriptionTooShortError } from '../errors/feedback-description-too-short.error'
+import { FeedbackTitleTooShortError } from '../errors/feedback/feedback-title-too-short.error'
+import { FeedbackDescriptionTooShortError } from '../errors/feedback/feedback-description-too-short.error'
 import { FeedbackCategory } from './reference/feedback-category.entity'
 import { FeedbackStatus } from './reference/feedback-status.entity'
-import { FeedbackCategoryDisabledError } from '../errors/feedback-category-disabled.error'
-import { FeedbackStatusDisabledError } from '../errors/feedback-status-disabled.error'
+import { FeedbackCategoryDisabledError } from '../errors/feedback/feedback-category-disabled.error'
+import { FeedbackStatusDisabledError } from '../errors/feedback/feedback-status-disabled.error'
 
 export interface FeedbackProps {
 	title: string
@@ -126,7 +126,7 @@ export class Feedback extends BaseEntity {
 	}
 
 	get isUpvoted() {
-		return this.props.hasUpvoted
+		return this.props.hasUpvoted ?? false
 	}
 
 	// --- Métodos Granulares (SRP dentro da Classe) ---
